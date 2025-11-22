@@ -3,6 +3,7 @@ import { startOfWeek, endOfWeek, format } from 'date-fns';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { Header } from '@/components/layout/Header';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
+import { BookingModal } from '@/components/booking/BookingModal';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 import { fetchAppointments } from '@/lib/api';
@@ -19,6 +20,13 @@ const Index = () => {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<{
+    provider: string;
+    providerName: string;
+    date: Date;
+    time: string;
+  } | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const { toast } = useToast();
 
@@ -97,6 +105,15 @@ const Index = () => {
     loadAppointments(true);
   };
 
+  const handleSlotClick = (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => {
+    setSelectedSlot(slotInfo);
+    setBookingModalOpen(true);
+  };
+
+  const handleBookingSuccess = () => {
+    loadAppointments();
+  };
+
   if (!isAuthenticated) {
     return <LoginForm onLogin={handleLogin} />;
   }
@@ -119,13 +136,21 @@ const Index = () => {
             </div>
           )}
           
-          <CalendarGrid 
-            weekStart={currentWeekStart} 
-            appointments={appointments}
-            eventBlocks={eventBlocks}
-            holidays={holidays}
-            isLoading={isLoading}
-          />
+        <CalendarGrid
+          weekStart={currentWeekStart}
+          appointments={appointments}
+          eventBlocks={eventBlocks}
+          holidays={holidays}
+          isLoading={isLoading}
+          onSlotClick={handleSlotClick}
+        />
+
+        <BookingModal
+          open={bookingModalOpen}
+          onClose={() => setBookingModalOpen(false)}
+          slotInfo={selectedSlot}
+          onBookingSuccess={handleBookingSuccess}
+        />
         </div>
       </main>
     </div>

@@ -13,12 +13,13 @@ interface DayColumnProps {
   appointments: Appointment[];
   eventBlocks: EventBlock[];
   holidays: Holiday[];
+  onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
 }
 
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -121,14 +122,47 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays }
                 event => event.provider === provider.id
               );
 
+              // Check if this slot has an appointment or event
+              const slotDateTime = new Date(date);
+              const [hours, minutes] = slot.time.split(':').map(Number);
+              slotDateTime.setHours(hours, minutes, 0, 0);
+              
+              const hasAppointment = providerAppointments.some(apt => {
+                const aptStart = toZonedTime(new Date(apt.start_time), HAWAII_TZ);
+                const aptEnd = toZonedTime(new Date(apt.end_time), HAWAII_TZ);
+                return slotDateTime >= aptStart && slotDateTime < aptEnd;
+              });
+
+              const hasEvent = providerEvents.some(event => {
+                const eventStart = toZonedTime(new Date(event.start_time), HAWAII_TZ);
+                const eventEnd = toZonedTime(new Date(event.end_time), HAWAII_TZ);
+                return slotDateTime >= eventStart && slotDateTime < eventEnd;
+              });
+
+              const isClickable = !slot.isLunchTime && !hasAppointment && !hasEvent;
+
+              const handleSlotClick = () => {
+                if (isClickable) {
+                  onSlotClick({
+                    provider: provider.id,
+                    providerName: provider.name,
+                    date: date,
+                    time: slot.time,
+                  });
+                }
+              };
+
               return (
                 <div
                   key={provider.id}
+                  onClick={handleSlotClick}
                   className={cn(
                     "flex-1 border-r border-cell-border last:border-r-0 transition-colors relative",
                     slot.isLunchTime
                       ? "lunch-stripes cursor-not-allowed"
-                      : "hover:bg-hover-cell cursor-pointer"
+                      : isClickable
+                      ? "hover:bg-hover-cell cursor-pointer"
+                      : "cursor-default"
                   )}
                 >
                   {/* Render appointments for this provider at this time */}

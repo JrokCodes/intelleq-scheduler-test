@@ -10,6 +10,7 @@ interface CalendarGridProps {
   eventBlocks: EventBlock[];
   holidays: Holiday[];
   isLoading: boolean;
+  onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
 }
 
 export const CalendarGrid = ({ 
@@ -17,7 +18,8 @@ export const CalendarGrid = ({
   appointments, 
   eventBlocks, 
   holidays,
-  isLoading 
+  isLoading,
+  onSlotClick 
 }: CalendarGridProps) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
@@ -44,6 +46,7 @@ export const CalendarGrid = ({
             appointments={appointments}
             eventBlocks={eventBlocks}
             holidays={holidays}
+            onSlotClick={onSlotClick}
           />
         ))}
       </div>
