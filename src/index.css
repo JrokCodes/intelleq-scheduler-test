@@ -79,4 +79,28 @@ All colors MUST be HSL.
         hsl(var(--cell-border)) 11px
       );
   }
+
+  /* Event block diagonal stripes pattern */
+  .event-block-stripes {
+    background: 
+      repeating-linear-gradient(
+        45deg,
+        hsl(var(--muted) / 0.5),
+        hsl(var(--muted) / 0.5) 10px,
+        hsl(var(--muted-foreground) / 0.1) 10px,
+        hsl(var(--muted-foreground) / 0.1) 20px
+      );
+  }
+
+  /* Holiday diagonal stripes pattern */
+  .holiday-stripes {
+    background: 
+      repeating-linear-gradient(
+        45deg,
+        hsl(var(--muted)),
+        hsl(var(--muted)) 10px,
+        hsl(var(--muted-foreground) / 0.1) 10px,
+        hsl(var(--muted-foreground) / 0.1) 20px
+      );
+  }
 }
