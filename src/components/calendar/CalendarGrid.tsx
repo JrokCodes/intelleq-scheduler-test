@@ -1,4 +1,4 @@
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import { TimeColumn } from './TimeColumn';
 import { DayColumn } from './DayColumn';
@@ -22,6 +22,13 @@ export const CalendarGrid = ({
   onSlotClick 
 }: CalendarGridProps) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  
+  console.log('📊 [CalendarGrid] Rendering with:', {
+    weekStart: format(weekStart, 'yyyy-MM-dd'),
+    appointmentsCount: appointments.length,
+    eventBlocksCount: eventBlocks.length,
+    holidaysCount: holidays.length
+  });
 
   if (isLoading) {
     return (

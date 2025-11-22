@@ -58,10 +58,10 @@ const Index = () => {
       const endDate = format(weekEnd, 'yyyy-MM-dd');
       
       console.log('📅 [Calendar] Loading appointments for week:', {
-        weekStart: currentWeekStart,
+        weekStart: format(currentWeekStart, 'yyyy-MM-dd'),
+        weekEnd: format(weekEnd, 'yyyy-MM-dd'),
         startDate,
-        endDate,
-        weekEnd
+        endDate
       });
       
       const apiUrl = `https://intelleqn8n.net/webhook/lovable-appointments?start_date=${startDate}&end_date=${endDate}`;
@@ -99,6 +99,19 @@ const Index = () => {
           eventBlocksSet: data.event_blocks?.length || 0,
           holidaysSet: data.holidays?.length || 0
         });
+        
+        // Log sample appointments for debugging
+        if (data.appointments && data.appointments.length > 0) {
+          console.log('📋 [Calendar] Sample appointments:');
+          data.appointments.slice(0, 3).forEach(apt => {
+            console.log({
+              patient: apt.patient_name,
+              provider: apt.provider,
+              start_time: apt.start_time,
+              duration: apt.duration_minutes
+            });
+          });
+        }
         
         if (showToast) {
           toast({
