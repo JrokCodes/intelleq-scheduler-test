@@ -17,7 +17,7 @@ export const TIME_SLOTS = Array.from({ length: 41 }, (_, i) => {
 
 export const PROVIDERS = [
   { id: 'cherie', name: 'Cherie', fullName: 'Ng, Cherie - PA' },
-  { id: 'anna-lia', name: 'Anna-Lia', fullName: 'Quinio, Anna-Lia - MD' },
+  { id: 'anna_lia', name: 'Anna-Lia', fullName: 'Quinio, Anna-Lia - MD' },
 ] as const;
 
 export const DAYS_OF_WEEK = [

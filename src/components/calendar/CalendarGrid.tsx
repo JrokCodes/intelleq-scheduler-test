@@ -2,13 +2,32 @@ import { addDays } from 'date-fns';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import { TimeColumn } from './TimeColumn';
 import { DayColumn } from './DayColumn';
+import { Appointment, EventBlock, Holiday } from '@/types/calendar';
 
 interface CalendarGridProps {
   weekStart: Date;
+  appointments: Appointment[];
+  eventBlocks: EventBlock[];
+  holidays: Holiday[];
+  isLoading: boolean;
 }
 
-export const CalendarGrid = ({ weekStart }: CalendarGridProps) => {
+export const CalendarGrid = ({ 
+  weekStart, 
+  appointments, 
+  eventBlocks, 
+  holidays,
+  isLoading 
+}: CalendarGridProps) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-muted-foreground">Loading appointments...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-auto">
@@ -22,6 +41,9 @@ export const CalendarGrid = ({ weekStart }: CalendarGridProps) => {
             key={day.toISOString()}
             date={day}
             dayName={DAYS_OF_WEEK[index]}
+            appointments={appointments}
+            eventBlocks={eventBlocks}
+            holidays={holidays}
           />
         ))}
       </div>
