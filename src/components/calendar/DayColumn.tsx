@@ -30,30 +30,57 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
 
   // Filter appointments and events for this day and convert to Hawaii time
   const dayAppointments = useMemo(() => {
-    return appointments.filter(apt => {
-      const aptStartHST = toZonedTime(new Date(apt.start_time), HAWAII_TZ);
-      return isSameDay(aptStartHST, date);
+    const filtered = appointments.filter(apt => {
+      const aptStartUTC = new Date(apt.start_time);
+      const aptStartHST = toZonedTime(aptStartUTC, HAWAII_TZ);
+      const match = isSameDay(aptStartHST, date);
+      
+      console.log('🔍 [DayColumn] Checking appointment:', {
+        patientName: apt.patient_name,
+        startTimeUTC: apt.start_time,
+        startTimeHST: format(aptStartHST, 'yyyy-MM-dd HH:mm:ss'),
+        columnDate: format(date, 'yyyy-MM-dd'),
+        matches: match
+      });
+      
+      return match;
     });
+    
+    console.log(`📅 [DayColumn] ${format(date, 'yyyy-MM-dd')} - Found ${filtered.length} appointments`);
+    return filtered;
   }, [appointments, date]);
 
   const dayEventBlocks = useMemo(() => {
     return eventBlocks.filter(event => {
-      const eventStartHST = toZonedTime(new Date(event.start_time), HAWAII_TZ);
+      const eventStartUTC = new Date(event.start_time);
+      const eventStartHST = toZonedTime(eventStartUTC, HAWAII_TZ);
       return isSameDay(eventStartHST, date);
     });
   }, [eventBlocks, date]);
 
   // Calculate position for appointments and events
   const getPositionForTime = (timeStr: string) => {
-    const time = toZonedTime(new Date(timeStr), HAWAII_TZ);
-    const hours = time.getHours();
-    const minutes = time.getMinutes();
+    const timeUTC = new Date(timeStr);
+    const timeHST = toZonedTime(timeUTC, HAWAII_TZ);
+    const hours = timeHST.getHours();
+    const minutes = timeHST.getMinutes();
     
     // Calendar starts at 7:00 AM
     const totalMinutesFromStart = (hours - 7) * 60 + minutes;
     const slotIndex = totalMinutesFromStart / 15;
+    const position = slotIndex * SLOT_HEIGHT;
     
-    return slotIndex * SLOT_HEIGHT;
+    console.log('📍 [DayColumn] Position for time:', {
+      timeUTC: timeStr,
+      timeHST: format(timeHST, 'HH:mm'),
+      hours,
+      minutes,
+      totalMinutesFromStart,
+      slotIndex,
+      position
+    });
+    
+    return position;
   };
 
   if (holiday) {
