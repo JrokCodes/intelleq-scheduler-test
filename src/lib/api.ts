@@ -10,6 +10,13 @@ export async function fetchAppointments(
   try {
     const url = `${API_BASE_URL}/lovable-appointments?start_date=${startDate}&end_date=${endDate}`;
     
+    console.log('🔍 [API] Fetching appointments:', {
+      url,
+      startDate,
+      endDate,
+      timestamp: new Date().toISOString()
+    });
+    
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -18,14 +25,42 @@ export async function fetchAppointments(
       },
     });
 
+    console.log('📡 [API] Response received:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      headers: Object.fromEntries(response.headers.entries())
+    });
+
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
-    const data: ApiResponse = await response.json();
+    const responseText = await response.text();
+    console.log('📄 [API] Raw response text:', responseText);
+    
+    let data: ApiResponse;
+    try {
+      data = JSON.parse(responseText);
+      console.log('✅ [API] Parsed data:', {
+        success: data.success,
+        appointmentsCount: data.appointments?.length || 0,
+        eventBlocksCount: data.event_blocks?.length || 0,
+        holidaysCount: data.holidays?.length || 0
+      });
+    } catch (parseError) {
+      console.error('❌ [API] JSON parse error:', parseError);
+      console.error('Response text was:', responseText);
+      throw new Error('Invalid JSON response from server');
+    }
+    
     return data;
   } catch (error) {
-    console.error('Error fetching appointments:', error);
+    console.error('❌ [API] Error fetching appointments:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     throw error;
   }
 }

@@ -28,6 +28,17 @@ const Index = () => {
     time: string;
   } | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [debugInfo, setDebugInfo] = useState<{
+    lastApiStatus: string;
+    lastApiUrl: string;
+    appointmentsCount: number;
+    dateRange: string;
+  }>({
+    lastApiStatus: 'Not yet called',
+    lastApiUrl: '',
+    appointmentsCount: 0,
+    dateRange: ''
+  });
   const { toast } = useToast();
 
   // Check auth on mount
@@ -46,13 +57,48 @@ const Index = () => {
       const startDate = format(currentWeekStart, 'yyyy-MM-dd');
       const endDate = format(weekEnd, 'yyyy-MM-dd');
       
+      console.log('📅 [Calendar] Loading appointments for week:', {
+        weekStart: currentWeekStart,
+        startDate,
+        endDate,
+        weekEnd
+      });
+      
+      const apiUrl = `https://intelleqn8n.net/webhook/lovable-appointments?start_date=${startDate}&end_date=${endDate}`;
+      
+      setDebugInfo(prev => ({
+        ...prev,
+        lastApiUrl: apiUrl,
+        dateRange: `${startDate} to ${endDate}`
+      }));
+      
       const data = await fetchAppointments(startDate, endDate);
+      
+      console.log('📊 [Calendar] Received data:', {
+        success: data.success,
+        appointments: data.appointments,
+        appointmentsCount: data.appointments?.length || 0,
+        eventBlocks: data.event_blocks,
+        holidays: data.holidays
+      });
       
       if (data.success) {
         setAppointments(data.appointments);
         setEventBlocks(data.event_blocks);
         setHolidays(data.holidays);
         setLastUpdated(new Date());
+        
+        setDebugInfo(prev => ({
+          ...prev,
+          lastApiStatus: '✅ Success',
+          appointmentsCount: data.appointments?.length || 0
+        }));
+        
+        console.log('✅ [Calendar] State updated:', {
+          appointmentsSet: data.appointments?.length || 0,
+          eventBlocksSet: data.event_blocks?.length || 0,
+          holidaysSet: data.holidays?.length || 0
+        });
         
         if (showToast) {
           toast({
@@ -62,7 +108,17 @@ const Index = () => {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch appointments:', error);
+      console.error('❌ [Calendar] Failed to fetch appointments:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      setDebugInfo(prev => ({
+        ...prev,
+        lastApiStatus: `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      }));
+      
       toast({
         title: "Failed to load appointments",
         description: "Could not connect to the server. Please try again.",
@@ -133,6 +189,28 @@ const Index = () => {
             <div className="absolute top-20 right-8 bg-card border border-border rounded-md px-3 py-2 shadow-lg z-10 flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin text-primary" />
               <span className="text-xs text-muted-foreground">Refreshing...</span>
+            </div>
+          )}
+          
+          {/* Debug Panel - Only in development */}
+          {import.meta.env.DEV && (
+            <div className="absolute top-20 left-8 bg-card border border-border rounded-md p-3 shadow-lg z-10 text-xs space-y-1 max-w-md">
+              <div className="font-semibold text-primary mb-2">🔧 Debug Panel</div>
+              <div className="text-muted-foreground">
+                <strong>Date Range:</strong> {debugInfo.dateRange || 'Not set'}
+              </div>
+              <div className="text-muted-foreground">
+                <strong>API Status:</strong> {debugInfo.lastApiStatus}
+              </div>
+              <div className="text-muted-foreground">
+                <strong>Appointments:</strong> {debugInfo.appointmentsCount}
+              </div>
+              <div className="text-muted-foreground break-all">
+                <strong>Last URL:</strong> {debugInfo.lastApiUrl || 'N/A'}
+              </div>
+              <div className="text-muted-foreground">
+                <strong>Calendar Week:</strong> {format(currentWeekStart, 'MMM dd')} - {format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), 'MMM dd, yyyy')}
+              </div>
             </div>
           )}
           
