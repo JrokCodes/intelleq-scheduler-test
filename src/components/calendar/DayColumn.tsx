@@ -14,12 +14,13 @@ interface DayColumnProps {
   eventBlocks: EventBlock[];
   holidays: Holiday[];
   onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
+  onAppointmentClick?: (appointment: Appointment) => void;
 }
 
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick, onAppointmentClick }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -168,7 +169,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                     }}
                     className="absolute z-10"
                   >
-                    <AppointmentCard appointment={apt} slotHeight={SLOT_HEIGHT} />
+                    <AppointmentCard appointment={apt} slotHeight={SLOT_HEIGHT} onClick={onAppointmentClick} />
                   </div>
                 );
               })}

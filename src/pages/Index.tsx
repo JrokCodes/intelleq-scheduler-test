@@ -4,6 +4,7 @@ import { LoginForm } from '@/components/auth/LoginForm';
 import { Header } from '@/components/layout/Header';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
 import { BookingModal } from '@/components/booking/BookingModal';
+import { AppointmentDetailModal } from '@/components/calendar/AppointmentDetailModal';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 import { fetchAppointments } from '@/lib/api';
@@ -27,6 +28,8 @@ const Index = () => {
     date: Date;
     time: string;
   } | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [debugInfo, setDebugInfo] = useState<{
     lastApiStatus: string;
@@ -180,7 +183,16 @@ const Index = () => {
     setBookingModalOpen(true);
   };
 
+  const handleAppointmentClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setDetailModalOpen(true);
+  };
+
   const handleBookingSuccess = () => {
+    loadAppointments();
+  };
+
+  const handleDeleteSuccess = () => {
     loadAppointments();
   };
 
@@ -235,6 +247,7 @@ const Index = () => {
           holidays={holidays}
           isLoading={isLoading}
           onSlotClick={handleSlotClick}
+          onAppointmentClick={handleAppointmentClick}
         />
 
         <BookingModal
@@ -242,6 +255,13 @@ const Index = () => {
           onClose={() => setBookingModalOpen(false)}
           slotInfo={selectedSlot}
           onBookingSuccess={handleBookingSuccess}
+        />
+
+        <AppointmentDetailModal
+          open={detailModalOpen}
+          onClose={() => setDetailModalOpen(false)}
+          appointment={selectedAppointment}
+          onDeleteSuccess={handleDeleteSuccess}
         />
         </div>
       </main>

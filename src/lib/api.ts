@@ -117,6 +117,35 @@ export async function addPatient(patientData: {
   }
 }
 
+export async function deleteAppointment(appointmentId: string): Promise<any> {
+  try {
+    const url = `${API_BASE_URL}/lovable-delete-appointment?id=${appointmentId}`;
+
+    console.log('🗑️ [API] Deleting appointment:', { appointmentId, url });
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    console.log('🗑️ [API] Delete response:', { status: response.status, data });
+
+    if (!response.ok || data.error) {
+      throw new Error(data.error || 'Failed to delete appointment');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('❌ [API] Error deleting appointment:', error);
+    throw error;
+  }
+}
+
 export async function createAppointment(appointmentData: {
   provider: string;
   patient_id: number;
