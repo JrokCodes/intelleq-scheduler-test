@@ -83,27 +83,39 @@ const Index = () => {
       });
       
       if (data.success) {
-        setAppointments(data.appointments);
-        setEventBlocks(data.event_blocks);
-        setHolidays(data.holidays);
+        // Use React 18 automatic batching properly by ensuring all updates happen synchronously
+        const appointmentsData = data.appointments || [];
+        const eventBlocksData = data.event_blocks || [];
+        const holidaysData = data.holidays || [];
+
+        console.log('🔄 [Calendar] About to set state with:', {
+          appointments: appointmentsData.length,
+          eventBlocks: eventBlocksData.length,
+          holidays: holidaysData.length
+        });
+
+        setAppointments(appointmentsData);
+        setEventBlocks(eventBlocksData);
+        setHolidays(holidaysData);
         setLastUpdated(new Date());
+        setIsLoading(false);
         
         setDebugInfo(prev => ({
           ...prev,
           lastApiStatus: '✅ Success',
-          appointmentsCount: data.appointments?.length || 0
+          appointmentsCount: appointmentsData.length
         }));
         
         console.log('✅ [Calendar] State updated:', {
-          appointmentsSet: data.appointments?.length || 0,
-          eventBlocksSet: data.event_blocks?.length || 0,
-          holidaysSet: data.holidays?.length || 0
+          appointmentsSet: appointmentsData.length,
+          eventBlocksSet: eventBlocksData.length,
+          holidaysSet: holidaysData.length
         });
         
         // Log sample appointments for debugging
-        if (data.appointments && data.appointments.length > 0) {
+        if (appointmentsData.length > 0) {
           console.log('📋 [Calendar] Sample appointments:');
-          data.appointments.slice(0, 3).forEach(apt => {
+          appointmentsData.slice(0, 3).forEach(apt => {
             console.log({
               patient: apt.patient_name,
               provider: apt.provider,
@@ -120,6 +132,7 @@ const Index = () => {
           });
         }
       }
+      setIsRefreshing(false);
     } catch (error) {
       console.error('❌ [Calendar] Failed to fetch appointments:', {
         error,
@@ -132,14 +145,14 @@ const Index = () => {
         lastApiStatus: `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`
       }));
       
+      setIsLoading(false);
+      setIsRefreshing(false);
+      
       toast({
         title: "Failed to load appointments",
         description: "Could not connect to the server. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsRefreshing(false);
-      setIsLoading(false);
     }
   }, [currentWeekStart, isAuthenticated, toast]);
 
@@ -187,6 +200,8 @@ const Index = () => {
     return <LoginForm onLogin={handleLogin} />;
   }
 
+  console.log('🎯 [Index] Rendering with appointments:', appointments.length, 'First:', appointments[0]?.patient_name);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header
@@ -228,6 +243,7 @@ const Index = () => {
           )}
           
         <CalendarGrid
+          key={`calendar-${currentWeekStart.toISOString()}-${appointments.length}`}
           weekStart={currentWeekStart}
           appointments={appointments}
           eventBlocks={eventBlocks}
