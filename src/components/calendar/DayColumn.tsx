@@ -136,94 +136,132 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
         </div>
       </div>
 
-      {/* Time slots grid */}
-      <div className="flex flex-col">
-        {TIME_SLOTS.map((slot, slotIndex) => (
-          <div key={slotIndex} className="flex h-12 border-b border-cell-border">
-            {PROVIDERS.map((provider) => {
-              // Find appointments and events for this provider and time slot
-              const providerAppointments = dayAppointments.filter(
-                apt => apt.provider === provider.id
-              );
-              const providerEvents = dayEventBlocks.filter(
-                event => event.provider === provider.id
-              );
+      {/* Time slots grid - relative container for absolute positioning of appointments */}
+      <div className="relative">
+        {/* Appointment and Event overlays - positioned absolutely relative to this container */}
+        {PROVIDERS.map((provider, providerIndex) => {
+          const providerAppointments = dayAppointments.filter(apt => apt.provider === provider.id);
+          const providerEvents = dayEventBlocks.filter(event => event.provider === provider.id);
 
-              // Check if this slot has an appointment or event
-              const slotDateTime = new Date(date);
-              const [hours, minutes] = slot.time.split(':').map(Number);
-              slotDateTime.setHours(hours, minutes, 0, 0);
-              
-              const hasAppointment = providerAppointments.some(apt => {
-                const aptStart = toZonedTime(new Date(apt.start_time), HAWAII_TZ);
-                const aptEnd = toZonedTime(new Date(apt.end_time), HAWAII_TZ);
-                return slotDateTime >= aptStart && slotDateTime < aptEnd;
-              });
+          return (
+            <div key={provider.id}>
+              {/* Appointments for this provider */}
+              {providerAppointments.map(apt => {
+                const topPosition = getPositionForTime(apt.start_time);
+                // Each provider column is 50% width (2 providers)
+                const leftPosition = providerIndex * 50;
 
-              const hasEvent = providerEvents.some(event => {
-                const eventStart = toZonedTime(new Date(event.start_time), HAWAII_TZ);
-                const eventEnd = toZonedTime(new Date(event.end_time), HAWAII_TZ);
-                return slotDateTime >= eventStart && slotDateTime < eventEnd;
-              });
+                console.log('🎯 [DayColumn] Rendering appointment:', {
+                  patient: apt.patient_name,
+                  provider: apt.provider,
+                  topPosition,
+                  leftPosition
+                });
 
-              const isClickable = !slot.isLunchTime && !hasAppointment && !hasEvent;
+                return (
+                  <div
+                    key={apt.id}
+                    style={{
+                      top: `${topPosition}px`,
+                      left: `${leftPosition}%`,
+                      width: '50%'
+                    }}
+                    className="absolute z-10"
+                  >
+                    <AppointmentCard appointment={apt} slotHeight={SLOT_HEIGHT} />
+                  </div>
+                );
+              })}
 
-              const handleSlotClick = () => {
-                if (isClickable) {
-                  onSlotClick({
-                    provider: provider.id,
-                    providerName: provider.name,
-                    date: date,
-                    time: slot.time,
-                  });
+              {/* Event blocks for this provider */}
+              {providerEvents.map(event => {
+                const topPosition = getPositionForTime(event.start_time);
+                const leftPosition = providerIndex * 50;
+
+                return (
+                  <div
+                    key={event.id}
+                    style={{
+                      top: `${topPosition}px`,
+                      left: `${leftPosition}%`,
+                      width: '50%'
+                    }}
+                    className="absolute z-10"
+                  >
+                    <EventBlockCard eventBlock={event} slotHeight={SLOT_HEIGHT} />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+
+        {/* Time slot grid cells */}
+        <div className="flex flex-col">
+          {TIME_SLOTS.map((slot, slotIndex) => (
+            <div key={slotIndex} className="flex h-12 border-b border-cell-border">
+              {PROVIDERS.map((provider) => {
+                // Check if this slot has an appointment or event for click handling
+                const providerAppointments = dayAppointments.filter(apt => apt.provider === provider.id);
+                const providerEvents = dayEventBlocks.filter(event => event.provider === provider.id);
+
+                // Parse the slot time correctly - handle "7:00 AM" format
+                const slotDateTime = new Date(date);
+                const timeParts = slot.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                if (timeParts) {
+                  let hours = parseInt(timeParts[1]);
+                  const minutes = parseInt(timeParts[2]);
+                  const ampm = timeParts[3].toUpperCase();
+
+                  if (ampm === 'PM' && hours !== 12) hours += 12;
+                  if (ampm === 'AM' && hours === 12) hours = 0;
+
+                  slotDateTime.setHours(hours, minutes, 0, 0);
                 }
-              };
 
-              return (
-                <div
-                  key={provider.id}
-                  onClick={handleSlotClick}
-                  className={cn(
-                    "flex-1 border-r border-cell-border last:border-r-0 transition-colors relative",
-                    slot.isLunchTime
-                      ? "lunch-stripes cursor-not-allowed"
-                      : isClickable
-                      ? "hover:bg-hover-cell cursor-pointer"
-                      : "cursor-default"
-                  )}
-                >
-                  {/* Render appointments for this provider at this time */}
-                  {slotIndex === 0 && providerAppointments.map(apt => {
-                    const topPosition = getPositionForTime(apt.start_time);
-                    return (
-                      <div
-                        key={apt.id}
-                        style={{ top: `${topPosition}px` }}
-                        className="absolute w-full"
-                      >
-                        <AppointmentCard appointment={apt} slotHeight={SLOT_HEIGHT} />
-                      </div>
-                    );
-                  })}
-                  
-                  {/* Render event blocks for this provider at this time */}
-                  {slotIndex === 0 && providerEvents.map(event => {
-                    const topPosition = getPositionForTime(event.start_time);
-                    return (
-                      <div
-                        key={event.id}
-                        style={{ top: `${topPosition}px` }}
-                        className="absolute w-full"
-                      >
-                        <EventBlockCard eventBlock={event} slotHeight={SLOT_HEIGHT} />
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        ))}
+                const hasAppointment = providerAppointments.some(apt => {
+                  const aptStart = toZonedTime(new Date(apt.start_time), HAWAII_TZ);
+                  const aptEnd = toZonedTime(new Date(apt.end_time), HAWAII_TZ);
+                  return slotDateTime >= aptStart && slotDateTime < aptEnd;
+                });
+
+                const hasEvent = providerEvents.some(event => {
+                  const eventStart = toZonedTime(new Date(event.start_time), HAWAII_TZ);
+                  const eventEnd = toZonedTime(new Date(event.end_time), HAWAII_TZ);
+                  return slotDateTime >= eventStart && slotDateTime < eventEnd;
+                });
+
+                const isClickable = !slot.isLunchTime && !hasAppointment && !hasEvent;
+
+                const handleSlotClick = () => {
+                  if (isClickable) {
+                    onSlotClick({
+                      provider: provider.id,
+                      providerName: provider.name,
+                      date: date,
+                      time: slot.time,
+                    });
+                  }
+                };
+
+                return (
+                  <div
+                    key={provider.id}
+                    onClick={handleSlotClick}
+                    className={cn(
+                      "flex-1 border-r border-cell-border last:border-r-0 transition-colors",
+                      slot.isLunchTime
+                        ? "lunch-stripes cursor-not-allowed"
+                        : isClickable
+                        ? "hover:bg-hover-cell cursor-pointer"
+                        : "cursor-default"
+                    )}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

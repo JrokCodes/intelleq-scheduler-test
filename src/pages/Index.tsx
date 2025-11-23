@@ -82,10 +82,11 @@ const Index = () => {
         holidays: data.holidays
       });
       
-      if (data.success) {
+      // Check if we have appointments data (API may not return 'success' field)
+      if (data.appointments) {
         setAppointments(data.appointments);
-        setEventBlocks(data.event_blocks);
-        setHolidays(data.holidays);
+        setEventBlocks(data.event_blocks || []);
+        setHolidays(data.holidays || []);
         setLastUpdated(new Date());
         
         setDebugInfo(prev => ({
