@@ -66,13 +66,33 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
 
     setIsSubmitting(true);
     try {
-      // Parse the time from slotInfo and combine with date
-      const [hours, minutes] = slotInfo.time.split(':').map(Number);
+      // Parse the time from slotInfo (format: "8:00 AM" or "1:30 PM")
+      const timeParts = slotInfo.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!timeParts) {
+        throw new Error('Invalid time format');
+      }
+
+      let hours = parseInt(timeParts[1]);
+      const minutes = parseInt(timeParts[2]);
+      const ampm = timeParts[3].toUpperCase();
+
+      // Convert to 24-hour format
+      if (ampm === 'PM' && hours !== 12) hours += 12;
+      if (ampm === 'AM' && hours === 12) hours = 0;
+
       const slotDateTime = new Date(slotInfo.date);
       slotDateTime.setHours(hours, minutes, 0, 0);
 
       // Convert to ISO string with Hawaii timezone offset
       const startTimeISO = format(slotDateTime, "yyyy-MM-dd'T'HH:mm:ss'-10:00'");
+
+      console.log('📅 [BookingModal] Creating appointment:', {
+        originalTime: slotInfo.time,
+        parsedHours: hours,
+        parsedMinutes: minutes,
+        slotDateTime: slotDateTime.toISOString(),
+        startTimeISO
+      });
 
       await createAppointment({
         provider: slotInfo.provider,
