@@ -1,8 +1,9 @@
-import { addDays, format } from 'date-fns';
+import { addDays, format, isToday } from 'date-fns';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import { TimeColumn } from './TimeColumn';
 import { DayColumn } from './DayColumn';
 import { Appointment, EventBlock, Holiday } from '@/types/calendar';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CalendarGridProps {
   weekStart: Date;
@@ -25,23 +26,45 @@ export const CalendarGrid = ({
 }: CalendarGridProps) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   
-  console.log('📊 [CalendarGrid] Rendering with:', {
-    weekStart: format(weekStart, 'yyyy-MM-dd'),
-    appointmentsCount: appointments.length,
-    eventBlocksCount: eventBlocks.length,
-    holidaysCount: holidays.length
-  });
+  const hasAnyData = appointments.length > 0 || eventBlocks.length > 0;
 
   if (isLoading) {
     return (
+      <div className="flex-1 overflow-auto animate-fade-in">
+        <div className="inline-flex min-w-full">
+          <TimeColumn />
+          {days.map((day, index) => (
+            <div key={day.toISOString()} className="flex flex-col border-r border-border min-w-[160px]">
+              <div className="h-16 border-b border-border bg-card p-3">
+                <Skeleton className="h-4 w-16 mb-2" />
+                <Skeleton className="h-3 w-12" />
+              </div>
+              <div className="p-4 space-y-2">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasAnyData) {
+    return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-muted-foreground">Loading appointments...</div>
+        <div className="text-center text-muted-foreground animate-fade-in">
+          <div className="text-4xl mb-4">📅</div>
+          <div className="text-lg font-medium">No appointments scheduled</div>
+          <div className="text-sm">for this week</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto animate-fade-in">
       <div className="inline-flex min-w-full">
         {/* Time column */}
         <TimeColumn />
@@ -57,6 +80,7 @@ export const CalendarGrid = ({
             holidays={holidays}
             onSlotClick={onSlotClick}
             onAppointmentClick={onAppointmentClick}
+            isToday={isToday(day)}
           />
         ))}
       </div>

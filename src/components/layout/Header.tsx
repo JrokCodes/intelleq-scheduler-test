@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, Clock } from 'lucide-react';
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, formatDistanceToNow } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
@@ -13,13 +13,30 @@ interface HeaderProps {
   onLogout: () => void;
   onRefresh: () => void;
   onBlockTime: () => void;
+  onJumpToToday: () => void;
+  lastUpdated: Date | null;
+  isRefreshing: boolean;
 }
 
-export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, onBlockTime }: HeaderProps) => {
+export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, onBlockTime, onJumpToToday, lastUpdated, isRefreshing }: HeaderProps) => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [lastUpdatedText, setLastUpdatedText] = useState<string>('');
   
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 });
   const weekRange = `${format(currentWeekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+
+  // Update "last updated" text every second
+  useEffect(() => {
+    const updateLastUpdatedText = () => {
+      if (lastUpdated) {
+        setLastUpdatedText(formatDistanceToNow(lastUpdated, { addSuffix: true, includeSeconds: true }));
+      }
+    };
+
+    updateLastUpdatedText();
+    const interval = setInterval(updateLastUpdatedText, 1000);
+    return () => clearInterval(interval);
+  }, [lastUpdated]);
 
   const handlePreviousWeek = () => {
     onWeekChange(subWeeks(currentWeekStart, 1));
@@ -98,6 +115,19 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, on
 
         {/* Right: Actions & Logout */}
         <div className="flex-1 flex items-center justify-end gap-2">
+          {lastUpdated && (
+            <div className="text-xs text-muted-foreground mr-2">
+              Updated {lastUpdatedText}
+            </div>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onJumpToToday}
+            className="border-border hover:bg-accent"
+          >
+            Today
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -111,9 +141,10 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, on
             variant="outline"
             size="sm"
             onClick={onRefresh}
+            disabled={isRefreshing}
             className="border-border hover:bg-accent"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
             Refresh
           </Button>
           <Button
