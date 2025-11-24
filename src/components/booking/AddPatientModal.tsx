@@ -167,6 +167,10 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
                     disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                     initialFocus
                     className="pointer-events-auto"
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={new Date().getFullYear()}
+                    defaultMonth={new Date(2000, 0)}
                   />
                 </PopoverContent>
               </Popover>
