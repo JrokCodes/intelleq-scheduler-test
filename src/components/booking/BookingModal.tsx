@@ -23,6 +23,19 @@ const APPOINTMENT_TYPES = [
   'Well Child Check',
 ];
 
+// Default durations for each appointment type (in minutes)
+const APPOINTMENT_TYPE_DURATIONS: Record<string, number> = {
+  'Complete Physical Exam': 30,
+  'Follow-up': 15,
+  'Medicare Wellness Visit': 30,
+  'New Patient': 30,
+  'Office Visit': 15,
+  'Procedure': 30,
+  'Same Day': 15,
+  'Shots Only': 15,
+  'Well Child Check': 30,
+};
+
 const DURATIONS = [
   { label: '15 minutes', value: 15 },
   { label: '30 minutes', value: 30 },
@@ -58,6 +71,13 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
       setShowAddPatient(true);
     }
   }, [appointmentType, selectedPatient]);
+
+  // Auto-fill duration when appointment type is selected
+  useEffect(() => {
+    if (appointmentType && APPOINTMENT_TYPE_DURATIONS[appointmentType]) {
+      setDuration(APPOINTMENT_TYPE_DURATIONS[appointmentType]);
+    }
+  }, [appointmentType]);
 
   // Check if form has any data entered
   const hasFormData = () => {
