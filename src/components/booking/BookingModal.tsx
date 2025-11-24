@@ -116,7 +116,13 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
         description: 'Appointment booked successfully',
       });
 
-      handleClose();
+      // Clear form state before closing (no confirmation needed after success)
+      setSelectedPatient(null);
+      setAppointmentType('');
+      setDuration(30);
+      setReason('');
+
+      onClose(); // Close without going through handleClose
       onBookingSuccess();
     } catch (error: any) {
       toast({
@@ -241,7 +247,23 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
             </div>
 
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={handleClose}>
+              <Button type="button" variant="outline" onClick={() => {
+                // Cancel button - confirm if form has data, otherwise just close
+                if (hasFormData()) {
+                  const confirmed = window.confirm(
+                    'Are you sure you want to cancel? Your entered information will be lost.'
+                  );
+                  if (confirmed) {
+                    setSelectedPatient(null);
+                    setAppointmentType('');
+                    setDuration(30);
+                    setReason('');
+                    onClose();
+                  }
+                } else {
+                  onClose();
+                }
+              }}>
                 Cancel
               </Button>
               <Button type="submit" disabled={!isFormValid || isSubmitting}>

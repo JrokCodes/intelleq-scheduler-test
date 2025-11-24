@@ -57,8 +57,15 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
         description: 'Patient added successfully',
       });
 
+      // Clear form state before closing (no confirmation needed after success)
+      setFirstName('');
+      setLastName('');
+      setDob(undefined);
+      setPhone('');
+      setEmail('');
+
       onPatientAdded(patient);
-      handleClose();
+      onClose(); // Close without going through handleClose
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -185,7 +192,24 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button type="button" variant="outline" onClick={() => {
+              // Cancel button - confirm if form has data, otherwise just close
+              if (hasFormData()) {
+                const confirmed = window.confirm(
+                  'Are you sure you want to cancel? Your entered information will be lost.'
+                );
+                if (confirmed) {
+                  setFirstName('');
+                  setLastName('');
+                  setDob(undefined);
+                  setPhone('');
+                  setEmail('');
+                  onClose();
+                }
+              } else {
+                onClose();
+              }
+            }}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
