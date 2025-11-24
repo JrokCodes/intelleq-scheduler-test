@@ -182,3 +182,35 @@ export async function createEventBlock(eventBlockData: {
 
   return data.event_block;
 }
+
+export async function deleteEventBlock(eventBlockId: string): Promise<any> {
+  const url = `${API_BASE_URL}/lovable-delete-event-block?id=${eventBlockId}`;
+
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'X-API-Key': API_KEY,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const responseText = await response.text();
+
+  if (!responseText || responseText.trim() === '') {
+    throw new Error(`API returned empty response (status: ${response.status}).`);
+  }
+
+  let data;
+  try {
+    data = JSON.parse(responseText);
+  } catch (parseError) {
+    console.error('JSON parse error:', parseError);
+    throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
+  }
+
+  if (!response.ok || data.error) {
+    throw new Error(data.error || 'Failed to delete event block');
+  }
+
+  return data;
+}

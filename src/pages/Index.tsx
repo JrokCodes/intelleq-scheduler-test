@@ -282,6 +282,7 @@ const Index = () => {
           open={eventBlockDetailModalOpen}
           onClose={() => setEventBlockDetailModalOpen(false)}
           eventBlock={selectedEventBlock}
+          onDeleteSuccess={handleDeleteSuccess}
         />
         </div>
       </main>
