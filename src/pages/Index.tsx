@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { startOfWeek, endOfWeek, format } from 'date-fns';
+import { startOfWeek, endOfWeek, format, addWeeks, subWeeks } from 'date-fns';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { Header } from '@/components/layout/Header';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
@@ -62,13 +62,6 @@ const Index = () => {
       const startDate = format(currentWeekStart, 'yyyy-MM-dd');
       const endDate = format(weekEnd, 'yyyy-MM-dd');
       
-      console.log('📅 [Calendar] Loading appointments for week:', {
-        weekStart: format(currentWeekStart, 'yyyy-MM-dd'),
-        weekEnd: format(weekEnd, 'yyyy-MM-dd'),
-        startDate,
-        endDate
-      });
-      
       const apiUrl = `https://intelleqn8n.net/webhook/lovable-appointments?start_date=${startDate}&end_date=${endDate}`;
       
       setDebugInfo(prev => ({
@@ -78,14 +71,6 @@ const Index = () => {
       }));
       
       const data = await fetchAppointments(startDate, endDate);
-      
-      console.log('📊 [Calendar] Received data:', {
-        success: data.success,
-        appointments: data.appointments,
-        appointmentsCount: data.appointments?.length || 0,
-        eventBlocks: data.event_blocks,
-        holidays: data.holidays
-      });
       
       // Check if we have appointments data (API may not return 'success' field)
       if (data.appointments) {
@@ -100,25 +85,6 @@ const Index = () => {
           appointmentsCount: data.appointments?.length || 0
         }));
         
-        console.log('✅ [Calendar] State updated:', {
-          appointmentsSet: data.appointments?.length || 0,
-          eventBlocksSet: data.event_blocks?.length || 0,
-          holidaysSet: data.holidays?.length || 0
-        });
-        
-        // Log sample appointments for debugging
-        if (data.appointments && data.appointments.length > 0) {
-          console.log('📋 [Calendar] Sample appointments:');
-          data.appointments.slice(0, 3).forEach(apt => {
-            console.log({
-              patient: apt.patient_name,
-              provider: apt.provider,
-              start_time: apt.start_time,
-              duration: apt.duration_minutes
-            });
-          });
-        }
-        
         if (showToast) {
           toast({
             title: "Calendar refreshed",
@@ -127,11 +93,7 @@ const Index = () => {
         }
       }
     } catch (error) {
-      console.error('❌ [Calendar] Failed to fetch appointments:', {
-        error,
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
+      console.error('Failed to fetch appointments:', error);
       
       setDebugInfo(prev => ({
         ...prev,
@@ -167,6 +129,46 @@ const Index = () => {
 
     return () => clearInterval(interval);
   }, [isAuthenticated, loadAppointments]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts if user is typing in an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          setCurrentWeekStart(prev => subWeeks(prev, 1));
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          setCurrentWeekStart(prev => addWeeks(prev, 1));
+          break;
+        case 't':
+        case 'T':
+          e.preventDefault();
+          setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
+          break;
+        case 'r':
+        case 'R':
+          e.preventDefault();
+          loadAppointments(true);
+          break;
+        case 'Escape':
+          e.preventDefault();
+          setBookingModalOpen(false);
+          setDetailModalOpen(false);
+          setEventBlockModalOpen(false);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [loadAppointments]);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -206,6 +208,10 @@ const Index = () => {
     loadAppointments();
   };
 
+  const handleJumpToToday = () => {
+    setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  };
+
   if (!isAuthenticated) {
     return <LoginForm onLogin={handleLogin} />;
   }
@@ -218,6 +224,9 @@ const Index = () => {
         onLogout={handleLogout}
         onRefresh={handleRefresh}
         onBlockTime={handleBlockTime}
+        onJumpToToday={handleJumpToToday}
+        lastUpdated={lastUpdated}
+        isRefreshing={isRefreshing}
       />
       <main className="flex-1 p-6 overflow-hidden">
         <div className="h-full bg-card rounded-lg border border-border overflow-hidden flex flex-col">

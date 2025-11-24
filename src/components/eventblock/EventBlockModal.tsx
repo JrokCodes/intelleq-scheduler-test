@@ -91,14 +91,6 @@ export const EventBlockModal = ({ open, onClose, onSuccess, defaultDate }: Event
       const startTimeISO = `${dateStr}T${startTime}:00-10:00`;
       const endTimeISO = `${dateStr}T${endTime}:00-10:00`;
 
-      console.log('📅 [EventBlockModal] Creating event block:', {
-        provider,
-        event_name: eventName,
-        start_time: startTimeISO,
-        end_time: endTimeISO,
-        notes,
-      });
-
       await createEventBlock({
         provider,
         event_name: eventName,

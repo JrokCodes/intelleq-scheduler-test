@@ -15,12 +15,13 @@ interface DayColumnProps {
   holidays: Holiday[];
   onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
   onAppointmentClick?: (appointment: Appointment) => void;
+  isToday?: boolean;
 }
 
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick, onAppointmentClick }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick, onAppointmentClick, isToday = false }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -31,24 +32,11 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
 
   // Filter appointments and events for this day and convert to Hawaii time
   const dayAppointments = useMemo(() => {
-    const filtered = appointments.filter(apt => {
+    return appointments.filter(apt => {
       const aptStartUTC = new Date(apt.start_time);
       const aptStartHST = toZonedTime(aptStartUTC, HAWAII_TZ);
-      const match = isSameDay(aptStartHST, date);
-      
-      console.log('🔍 [DayColumn] Checking appointment:', {
-        patientName: apt.patient_name,
-        startTimeUTC: apt.start_time,
-        startTimeHST: format(aptStartHST, 'yyyy-MM-dd HH:mm:ss'),
-        columnDate: format(date, 'yyyy-MM-dd'),
-        matches: match
-      });
-      
-      return match;
+      return isSameDay(aptStartHST, date);
     });
-    
-    console.log(`📅 [DayColumn] ${format(date, 'yyyy-MM-dd')} - Found ${filtered.length} appointments`);
-    return filtered;
   }, [appointments, date]);
 
   const dayEventBlocks = useMemo(() => {
@@ -71,24 +59,20 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
     const slotIndex = totalMinutesFromStart / 15;
     const position = slotIndex * SLOT_HEIGHT;
     
-    console.log('📍 [DayColumn] Position for time:', {
-      timeUTC: timeStr,
-      timeHST: format(timeHST, 'HH:mm'),
-      hours,
-      minutes,
-      totalMinutesFromStart,
-      slotIndex,
-      position
-    });
-    
     return position;
   };
 
   if (holiday) {
     return (
-      <div className="flex flex-col border-r border-border min-w-[160px]">
+      <div className={cn(
+        "flex flex-col border-r border-border min-w-[160px]",
+        isToday && "bg-primary/5 border-l-2 border-l-primary"
+      )}>
         {/* Day Header */}
-        <div className="h-16 border-b border-border bg-card">
+        <div className={cn(
+          "h-16 border-b border-border bg-card",
+          isToday && "bg-primary/10"
+        )}>
           <div className="text-center py-2">
             <div className="text-sm font-semibold text-foreground">{dayName}</div>
             <div className="text-xs text-muted-foreground">{dateStr}</div>
@@ -117,9 +101,15 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
   }
 
   return (
-    <div className="flex flex-col border-r border-border min-w-[160px]">
+    <div className={cn(
+      "flex flex-col border-r border-border min-w-[160px]",
+      isToday && "bg-primary/5 border-l-2 border-l-primary"
+    )}>
       {/* Day Header */}
-      <div className="h-16 border-b border-border bg-card">
+      <div className={cn(
+        "h-16 border-b border-border bg-card",
+        isToday && "bg-primary/10"
+      )}>
         <div className="text-center py-2">
           <div className="text-sm font-semibold text-foreground">{dayName}</div>
           <div className="text-xs text-muted-foreground">{dateStr}</div>
@@ -151,13 +141,6 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                 const topPosition = getPositionForTime(apt.start_time);
                 // Each provider column is 50% width (2 providers)
                 const leftPosition = providerIndex * 50;
-
-                console.log('🎯 [DayColumn] Rendering appointment:', {
-                  patient: apt.patient_name,
-                  provider: apt.provider,
-                  topPosition,
-                  leftPosition
-                });
 
                 return (
                   <div
