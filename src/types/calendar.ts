@@ -8,7 +8,8 @@ export interface Appointment {
   duration_minutes: number;
   appointment_type: string;
   reason: string;
-  booked_by: 'staff' | 'ai';
+  booked_by?: string;
+  booked_by_ai?: boolean;
   color: string;
 }
 

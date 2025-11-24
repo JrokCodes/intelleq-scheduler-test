@@ -36,15 +36,15 @@ export const AppointmentCard = ({ appointment, slotHeight, onClick }: Appointmen
             }}
           >
             <div className="relative h-full overflow-hidden">
-              {appointment.booked_by === 'ai' && (
-                <div className="absolute top-0 right-0 text-xs">🤖</div>
-              )}
               <div className="text-white font-semibold text-xs truncate">
                 {appointment.patient_name}
               </div>
               <div className="text-white/80 text-xs truncate">
                 {appointment.appointment_type}
               </div>
+              {appointment.booked_by_ai && (
+                <div className="absolute bottom-0 right-0 text-xs" title="Booked by AI">🤖</div>
+              )}
             </div>
           </div>
         </TooltipTrigger>
