@@ -158,7 +158,15 @@ export async function createAppointment(appointmentData: {
   reason: string;
 }): Promise<any> {
   try {
-    const response = await fetch(`${API_BASE_URL}/lovable-create-appointment`, {
+    const url = `${API_BASE_URL}/lovable-create-appointment`;
+
+    console.log('📝 [API] Creating appointment:', {
+      url,
+      appointmentData,
+      timestamp: new Date().toISOString()
+    });
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'X-API-Key': API_KEY,
@@ -167,15 +175,38 @@ export async function createAppointment(appointmentData: {
       body: JSON.stringify(appointmentData),
     });
 
-    const data = await response.json();
+    console.log('📡 [API] Create appointment response:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
+
+    // Get raw response text first to handle empty responses
+    const responseText = await response.text();
+    console.log('📄 [API] Create appointment raw response:', responseText || '(empty response)');
+
+    // Check for empty response
+    if (!responseText || responseText.trim() === '') {
+      throw new Error(`API returned empty response (status: ${response.status}). The n8n workflow may not be configured correctly.`);
+    }
+
+    // Try to parse JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log('✅ [API] Create appointment parsed data:', data);
+    } catch (parseError) {
+      console.error('❌ [API] JSON parse error:', parseError);
+      throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
+    }
 
     if (!response.ok || !data.success) {
-      throw new Error(data.error || 'Failed to create appointment');
+      throw new Error(data.error || `Failed to create appointment (status: ${response.status})`);
     }
 
     return data.appointment;
   } catch (error) {
-    console.error('Error creating appointment:', error);
+    console.error('❌ [API] Error creating appointment:', error);
     throw error;
   }
 }
