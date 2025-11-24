@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, Clock } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -12,9 +12,10 @@ interface HeaderProps {
   onWeekChange: (date: Date) => void;
   onLogout: () => void;
   onRefresh: () => void;
+  onBlockTime: () => void;
 }
 
-export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh }: HeaderProps) => {
+export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, onBlockTime }: HeaderProps) => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 });
@@ -95,8 +96,17 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh }: 
           </Popover>
         </div>
 
-        {/* Right: Refresh & Logout */}
+        {/* Right: Actions & Logout */}
         <div className="flex-1 flex items-center justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onBlockTime}
+            className="border-border hover:bg-accent"
+          >
+            <Clock className="h-4 w-4 mr-2" />
+            Block Time
+          </Button>
           <Button
             variant="outline"
             size="sm"

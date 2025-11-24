@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
 import { BookingModal } from '@/components/booking/BookingModal';
 import { AppointmentDetailModal } from '@/components/calendar/AppointmentDetailModal';
+import { EventBlockModal } from '@/components/eventblock/EventBlockModal';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 import { fetchAppointments } from '@/lib/api';
@@ -30,6 +31,7 @@ const Index = () => {
   } | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [eventBlockModalOpen, setEventBlockModalOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [debugInfo, setDebugInfo] = useState<{
     lastApiStatus: string;
@@ -196,6 +198,14 @@ const Index = () => {
     loadAppointments();
   };
 
+  const handleBlockTime = () => {
+    setEventBlockModalOpen(true);
+  };
+
+  const handleEventBlockSuccess = () => {
+    loadAppointments();
+  };
+
   if (!isAuthenticated) {
     return <LoginForm onLogin={handleLogin} />;
   }
@@ -207,6 +217,7 @@ const Index = () => {
         onWeekChange={setCurrentWeekStart}
         onLogout={handleLogout}
         onRefresh={handleRefresh}
+        onBlockTime={handleBlockTime}
       />
       <main className="flex-1 p-6 overflow-hidden">
         <div className="h-full bg-card rounded-lg border border-border overflow-hidden flex flex-col">
@@ -262,6 +273,13 @@ const Index = () => {
           onClose={() => setDetailModalOpen(false)}
           appointment={selectedAppointment}
           onDeleteSuccess={handleDeleteSuccess}
+        />
+
+        <EventBlockModal
+          open={eventBlockModalOpen}
+          onClose={() => setEventBlockModalOpen(false)}
+          onSuccess={handleEventBlockSuccess}
+          defaultDate={currentWeekStart}
         />
         </div>
       </main>

@@ -210,3 +210,64 @@ export async function createAppointment(appointmentData: {
     throw error;
   }
 }
+
+export async function createEventBlock(eventBlockData: {
+  provider: string;
+  event_name: string;
+  start_time: string;
+  end_time: string;
+  notes?: string;
+}): Promise<any> {
+  try {
+    const url = `${API_BASE_URL}/lovable-create-event-block`;
+
+    console.log('📝 [API] Creating event block:', {
+      url,
+      eventBlockData,
+      timestamp: new Date().toISOString()
+    });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventBlockData),
+    });
+
+    console.log('📡 [API] Create event block response:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    });
+
+    // Get raw response text first to handle empty responses
+    const responseText = await response.text();
+    console.log('📄 [API] Create event block raw response:', responseText || '(empty response)');
+
+    // Check for empty response
+    if (!responseText || responseText.trim() === '') {
+      throw new Error(`API returned empty response (status: ${response.status}). The n8n workflow may not be configured correctly.`);
+    }
+
+    // Try to parse JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log('✅ [API] Create event block parsed data:', data);
+    } catch (parseError) {
+      console.error('❌ [API] JSON parse error:', parseError);
+      throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
+    }
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || `Failed to create event block (status: ${response.status})`);
+    }
+
+    return data.event_block;
+  } catch (error) {
+    console.error('❌ [API] Error creating event block:', error);
+    throw error;
+  }
+}
