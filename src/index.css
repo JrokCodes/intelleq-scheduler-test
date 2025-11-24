@@ -94,7 +94,7 @@ All colors MUST be HSL.
 
   /* Holiday diagonal stripes pattern */
   .holiday-stripes {
-    background: 
+    background:
       repeating-linear-gradient(
         45deg,
         hsl(var(--muted)),
@@ -103,4 +103,29 @@ All colors MUST be HSL.
         hsl(var(--muted-foreground) / 0.1) 20px
       );
   }
+}
+
+/* Calendar dropdown styling for dark mode */
+.rdp-dropdown {
+  background-color: hsl(var(--popover));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.rdp-dropdown option {
+  background-color: hsl(var(--popover));
+  color: hsl(var(--foreground));
+  padding: 0.5rem;
+}
+
+.rdp-dropdown:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.rdp-dropdown:hover {
+  background-color: hsl(var(--accent));
 }

@@ -159,7 +159,12 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
                     {dob ? format(dob, 'PPP') : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent
+                  className="w-auto p-0"
+                  align="start"
+                  sideOffset={5}
+                  alignOffset={-5}
+                >
                   <Calendar
                     mode="single"
                     selected={dob}
