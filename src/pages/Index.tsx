@@ -246,28 +246,6 @@ const Index = () => {
             </div>
           )}
           
-          {/* Debug Panel - Only in development */}
-          {import.meta.env.DEV && (
-            <div className="absolute top-20 left-8 bg-card border border-border rounded-md p-3 shadow-lg z-10 text-xs space-y-1 max-w-md">
-              <div className="font-semibold text-primary mb-2">🔧 Debug Panel</div>
-              <div className="text-muted-foreground">
-                <strong>Date Range:</strong> {debugInfo.dateRange || 'Not set'}
-              </div>
-              <div className="text-muted-foreground">
-                <strong>API Status:</strong> {debugInfo.lastApiStatus}
-              </div>
-              <div className="text-muted-foreground">
-                <strong>Appointments:</strong> {debugInfo.appointmentsCount}
-              </div>
-              <div className="text-muted-foreground break-all">
-                <strong>Last URL:</strong> {debugInfo.lastApiUrl || 'N/A'}
-              </div>
-              <div className="text-muted-foreground">
-                <strong>Calendar Week:</strong> {format(currentWeekStart, 'MMM dd')} - {format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), 'MMM dd, yyyy')}
-              </div>
-            </div>
-          )}
-          
         <CalendarGrid
           weekStart={currentWeekStart}
           appointments={appointments}
