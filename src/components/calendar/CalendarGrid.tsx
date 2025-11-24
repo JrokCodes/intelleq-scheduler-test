@@ -13,6 +13,7 @@ interface CalendarGridProps {
   isLoading: boolean;
   onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
   onAppointmentClick?: (appointment: Appointment) => void;
+  onEventBlockClick?: (eventBlock: EventBlock) => void;
 }
 
 export const CalendarGrid = ({
@@ -22,7 +23,8 @@ export const CalendarGrid = ({
   holidays,
   isLoading,
   onSlotClick,
-  onAppointmentClick
+  onAppointmentClick,
+  onEventBlockClick
 }: CalendarGridProps) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   
@@ -80,6 +82,7 @@ export const CalendarGrid = ({
             holidays={holidays}
             onSlotClick={onSlotClick}
             onAppointmentClick={onAppointmentClick}
+            onEventBlockClick={onEventBlockClick}
             isToday={isToday(day)}
           />
         ))}

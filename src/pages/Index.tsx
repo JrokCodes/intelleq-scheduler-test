@@ -6,6 +6,7 @@ import { CalendarGrid } from '@/components/calendar/CalendarGrid';
 import { BookingModal } from '@/components/booking/BookingModal';
 import { AppointmentDetailModal } from '@/components/calendar/AppointmentDetailModal';
 import { EventBlockModal } from '@/components/eventblock/EventBlockModal';
+import { EventBlockDetailModal } from '@/components/calendar/EventBlockDetailModal';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 import { fetchAppointments } from '@/lib/api';
@@ -32,6 +33,8 @@ const Index = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [eventBlockModalOpen, setEventBlockModalOpen] = useState(false);
+  const [selectedEventBlock, setSelectedEventBlock] = useState<EventBlock | null>(null);
+  const [eventBlockDetailModalOpen, setEventBlockDetailModalOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [debugInfo, setDebugInfo] = useState<{
     lastApiStatus: string;
@@ -212,6 +215,11 @@ const Index = () => {
     setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
   };
 
+  const handleEventBlockClick = (eventBlock: EventBlock) => {
+    setSelectedEventBlock(eventBlock);
+    setEventBlockDetailModalOpen(true);
+  };
+
   if (!isAuthenticated) {
     return <LoginForm onLogin={handleLogin} />;
   }
@@ -268,6 +276,7 @@ const Index = () => {
           isLoading={isLoading}
           onSlotClick={handleSlotClick}
           onAppointmentClick={handleAppointmentClick}
+          onEventBlockClick={handleEventBlockClick}
         />
 
         <BookingModal
@@ -289,6 +298,12 @@ const Index = () => {
           onClose={() => setEventBlockModalOpen(false)}
           onSuccess={handleEventBlockSuccess}
           defaultDate={currentWeekStart}
+        />
+
+        <EventBlockDetailModal
+          open={eventBlockDetailModalOpen}
+          onClose={() => setEventBlockDetailModalOpen(false)}
+          eventBlock={selectedEventBlock}
         />
         </div>
       </main>

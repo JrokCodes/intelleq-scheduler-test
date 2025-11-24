@@ -15,13 +15,14 @@ interface DayColumnProps {
   holidays: Holiday[];
   onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
   onAppointmentClick?: (appointment: Appointment) => void;
+  onEventBlockClick?: (eventBlock: EventBlock) => void;
   isToday?: boolean;
 }
 
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick, onAppointmentClick, isToday = false }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -172,7 +173,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                     }}
                     className="absolute z-10"
                   >
-                    <EventBlockCard eventBlock={event} slotHeight={SLOT_HEIGHT} />
+                    <EventBlockCard eventBlock={event} slotHeight={SLOT_HEIGHT} onClick={onEventBlockClick} />
                   </div>
                 );
               })}
@@ -190,29 +191,36 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                 const providerEvents = dayEventBlocks.filter(event => event.provider === provider.id);
 
                 // Parse the slot time correctly - handle "7:00 AM" format
-                const slotDateTime = new Date(date);
                 const timeParts = slot.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                let slotHours = 0;
+                let slotMinutes = 0;
                 if (timeParts) {
-                  let hours = parseInt(timeParts[1]);
-                  const minutes = parseInt(timeParts[2]);
+                  slotHours = parseInt(timeParts[1]);
+                  slotMinutes = parseInt(timeParts[2]);
                   const ampm = timeParts[3].toUpperCase();
 
-                  if (ampm === 'PM' && hours !== 12) hours += 12;
-                  if (ampm === 'AM' && hours === 12) hours = 0;
-
-                  slotDateTime.setHours(hours, minutes, 0, 0);
+                  if (ampm === 'PM' && slotHours !== 12) slotHours += 12;
+                  if (ampm === 'AM' && slotHours === 12) slotHours = 0;
                 }
 
+                // Check appointments by comparing hours/minutes in Hawaii time
                 const hasAppointment = providerAppointments.some(apt => {
-                  const aptStart = toZonedTime(new Date(apt.start_time), HAWAII_TZ);
-                  const aptEnd = toZonedTime(new Date(apt.end_time), HAWAII_TZ);
-                  return slotDateTime >= aptStart && slotDateTime < aptEnd;
+                  const aptStartHST = toZonedTime(new Date(apt.start_time), HAWAII_TZ);
+                  const aptEndHST = toZonedTime(new Date(apt.end_time), HAWAII_TZ);
+                  const aptStartMinutes = aptStartHST.getHours() * 60 + aptStartHST.getMinutes();
+                  const aptEndMinutes = aptEndHST.getHours() * 60 + aptEndHST.getMinutes();
+                  const slotTotalMinutes = slotHours * 60 + slotMinutes;
+                  return slotTotalMinutes >= aptStartMinutes && slotTotalMinutes < aptEndMinutes;
                 });
 
+                // Check event blocks by comparing hours/minutes in Hawaii time
                 const hasEvent = providerEvents.some(event => {
-                  const eventStart = toZonedTime(new Date(event.start_time), HAWAII_TZ);
-                  const eventEnd = toZonedTime(new Date(event.end_time), HAWAII_TZ);
-                  return slotDateTime >= eventStart && slotDateTime < eventEnd;
+                  const eventStartHST = toZonedTime(new Date(event.start_time), HAWAII_TZ);
+                  const eventEndHST = toZonedTime(new Date(event.end_time), HAWAII_TZ);
+                  const eventStartMinutes = eventStartHST.getHours() * 60 + eventStartHST.getMinutes();
+                  const eventEndMinutes = eventEndHST.getHours() * 60 + eventEndHST.getMinutes();
+                  const slotTotalMinutes = slotHours * 60 + slotMinutes;
+                  return slotTotalMinutes >= eventStartMinutes && slotTotalMinutes < eventEndMinutes;
                 });
 
                 const isClickable = !slot.isLunchTime && !hasAppointment && !hasEvent;
