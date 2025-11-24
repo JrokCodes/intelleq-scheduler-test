@@ -66,10 +66,22 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
 
     setIsSubmitting(true);
     try {
+      // DEBUG: Log what we're receiving
+      console.log('📅 [BookingModal] slotInfo received:', {
+        provider: slotInfo.provider,
+        providerName: slotInfo.providerName,
+        date: slotInfo.date,
+        time: slotInfo.time,
+        timeType: typeof slotInfo.time
+      });
+
       // Parse the time from slotInfo (format: "8:00 AM" or "1:30 PM")
       const timeParts = slotInfo.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      console.log('📅 [BookingModal] Time parsing result:', { timeParts });
+
       if (!timeParts) {
-        throw new Error('Invalid time format');
+        console.error('❌ [BookingModal] Failed to parse time:', slotInfo.time);
+        throw new Error(`Invalid time format: "${slotInfo.time}"`);
       }
 
       let hours = parseInt(timeParts[1]);
