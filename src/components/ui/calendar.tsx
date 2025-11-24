@@ -15,13 +15,13 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center gap-1",
-        caption_label: "text-sm font-medium",
-        caption_dropdowns: "flex gap-1",
-        dropdown_month: "bg-popover text-foreground border border-input rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-        dropdown_year: "bg-popover text-foreground border border-input rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        caption: "flex justify-center pt-1 pb-2 relative items-center",
+        caption_label: "hidden", // Hide decorative month/year text with arrows
+        caption_dropdowns: "flex gap-3 justify-center w-full",
+        dropdown_month: "bg-popover text-foreground border border-input rounded-md px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-w-[120px]",
+        dropdown_year: "bg-popover text-foreground border border-input rounded-md px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-w-[100px]",
         dropdown: "bg-popover text-foreground",
-        nav: "space-x-1 flex items-center",
+        nav: "hidden", // Hide left/right navigation arrows to prevent overlap
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
           "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",

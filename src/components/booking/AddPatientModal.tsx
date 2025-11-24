@@ -3,13 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { addPatient } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import { DatePickerModal } from '@/components/calendar/DatePickerModal';
 
 interface AddPatientModalProps {
   open: boolean;
@@ -24,6 +22,7 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Check if form has any data entered
   const hasFormData = () => {
@@ -146,39 +145,14 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
             </div>
             <div className="space-y-2">
               <Label>Date of Birth *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !dob && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dob ? format(dob, 'PPP') : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto p-0"
-                  align="start"
-                  sideOffset={5}
-                  alignOffset={-5}
-                >
-                  <Calendar
-                    mode="single"
-                    selected={dob}
-                    onSelect={setDob}
-                    disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
-                    initialFocus
-                    className="pointer-events-auto"
-                    captionLayout="dropdown-buttons"
-                    fromYear={1900}
-                    toYear={new Date().getFullYear()}
-                    defaultMonth={new Date(2000, 0)}
-                  />
-                </PopoverContent>
-              </Popover>
+              <Button
+                variant="outline"
+                onClick={() => setShowDatePicker(true)}
+                className="w-full justify-start text-left font-normal"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dob ? format(dob, 'PPP') : <span className="text-muted-foreground">Pick a date</span>}
+              </Button>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
@@ -227,6 +201,16 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <DatePickerModal
+        open={showDatePicker}
+        onClose={() => setShowDatePicker(false)}
+        onDateSelect={(date) => setDob(date)}
+        title="Select Date of Birth"
+        selectedDate={dob}
+        minDate={new Date('1900-01-01')}
+        maxDate={new Date()}
+      />
     </Dialog>
   );
 };

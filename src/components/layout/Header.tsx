@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, Clock } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { DatePickerModal } from '@/components/calendar/DatePickerModal';
 
 interface HeaderProps {
   currentWeekStart: Date;
@@ -32,12 +31,10 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, on
     onWeekChange(addWeeks(currentWeekStart, 1));
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-      onWeekChange(weekStart);
-      setDatePickerOpen(false);
-    }
+  const handleDateSelect = (date: Date) => {
+    const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+    onWeekChange(weekStart);
+    setDatePickerOpen(false);
   };
 
   const handleLogout = () => {
@@ -77,26 +74,15 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, on
             <ChevronRight className="h-4 w-4" />
           </Button>
 
-          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 border-border hover:bg-accent ml-2"
-              >
-                <Calendar className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-popover border-border" align="center">
-              <CalendarComponent
-                mode="single"
-                selected={currentWeekStart}
-                onSelect={handleDateSelect}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setDatePickerOpen(true)}
+            className="h-9 w-9 border-border hover:bg-accent ml-2"
+            title="Jump to date"
+          >
+            <Calendar className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Right: Actions & Logout */}
@@ -139,6 +125,14 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, on
           </Button>
         </div>
       </div>
+
+      <DatePickerModal
+        open={datePickerOpen}
+        onClose={() => setDatePickerOpen(false)}
+        onDateSelect={handleDateSelect}
+        title="Jump to Date"
+        selectedDate={currentWeekStart}
+      />
     </header>
   );
 };
