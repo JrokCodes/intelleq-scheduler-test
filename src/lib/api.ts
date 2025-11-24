@@ -75,6 +75,12 @@ export async function addPatient(patientData: {
     }
 
     const data = await response.json();
+
+    // Check if the API returned an error (e.g., duplicate patient)
+    if (data.success === false) {
+      throw new Error(data.error || 'Failed to add patient');
+    }
+
     return data.patient;
   } catch (error) {
     console.error('Error adding patient:', error);
