@@ -1,5 +1,5 @@
-// Time slots from 7:00 AM to 2:00 PM in 15-minute increments (28 slots)
-export const TIME_SLOTS = Array.from({ length: 28 }, (_, i) => {
+// Time slots from 7:00 AM to 5:00 PM in 15-minute increments (41 slots)
+export const TIME_SLOTS = Array.from({ length: 41 }, (_, i) => {
   const totalMinutes = 7 * 60 + i * 15; // Start at 7:00 AM
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;

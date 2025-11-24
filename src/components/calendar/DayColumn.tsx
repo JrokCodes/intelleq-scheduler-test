@@ -19,7 +19,7 @@ interface DayColumnProps {
   isToday?: boolean;
 }
 
-const SLOT_HEIGHT = 56; // Height of each 15-minute slot in pixels (larger for better visibility)
+const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
 export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false }: DayColumnProps) => {
@@ -79,11 +79,11 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
             <div className="text-xs text-muted-foreground">{dateStr}</div>
           </div>
           {/* Provider sub-headers */}
-          <div className="flex border-t border-slate-200 dark:border-slate-700">
+          <div className="flex border-t border-slate-400 dark:border-slate-500">
             {PROVIDERS.map((provider) => (
               <div
                 key={provider.id}
-                className="flex-1 text-center py-1 border-r border-slate-200 dark:border-slate-700 last:border-r-0"
+                className="flex-1 text-center py-1 border-r border-slate-400 dark:border-slate-500 last:border-r-0"
               >
                 <span className="text-xs text-muted-foreground">{provider.name}</span>
               </div>
@@ -116,11 +116,11 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
           <div className="text-xs text-muted-foreground">{dateStr}</div>
         </div>
         {/* Provider sub-headers */}
-        <div className="flex border-t border-slate-200 dark:border-slate-700">
+        <div className="flex border-t border-slate-400 dark:border-slate-500">
           {PROVIDERS.map((provider) => (
             <div
               key={provider.id}
-              className="flex-1 text-center py-1 border-r border-slate-200 dark:border-slate-700 last:border-r-0"
+              className="flex-1 text-center py-1 border-r border-slate-400 dark:border-slate-500 last:border-r-0"
             >
               <span className="text-xs text-muted-foreground">{provider.name}</span>
             </div>
@@ -184,7 +184,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
         {/* Time slot grid cells */}
         <div className="flex flex-col">
           {TIME_SLOTS.map((slot, slotIndex) => (
-            <div key={slotIndex} className="flex h-14 border-b border-slate-300 dark:border-slate-600">
+            <div key={slotIndex} className="flex h-12 border-b border-slate-400 dark:border-slate-500">
               {PROVIDERS.map((provider) => {
                 // Check if this slot has an appointment or event for click handling
                 const providerAppointments = dayAppointments.filter(apt => apt.provider === provider.id);
@@ -241,7 +241,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                     key={provider.id}
                     onClick={handleSlotClick}
                     className={cn(
-                      "flex-1 border-r border-slate-200 dark:border-slate-700 last:border-r-0 transition-colors",
+                      "flex-1 border-r border-slate-400 dark:border-slate-500 last:border-r-0 transition-colors",
                       slot.isLunchTime
                         ? "lunch-stripes cursor-not-allowed"
                         : isClickable

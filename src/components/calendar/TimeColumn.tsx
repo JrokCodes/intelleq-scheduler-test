@@ -12,7 +12,7 @@ export const TimeColumn = () => {
       {TIME_SLOTS.map((slot, index) => (
         <div
           key={index}
-          className="h-14 border-b border-slate-300 dark:border-slate-600 flex items-start justify-end pr-3 pt-1"
+          className="h-12 border-b border-slate-400 dark:border-slate-500 flex items-start justify-end pr-3 pt-1"
         >
           <span className="text-xs text-time-text font-medium">{slot.time}</span>
         </div>
