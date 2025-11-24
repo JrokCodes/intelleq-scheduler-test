@@ -26,17 +26,18 @@ export const CalendarGrid = ({
   onAppointmentClick,
   onEventBlockClick
 }: CalendarGridProps) => {
-  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  
+  // Only show weekdays (Monday-Friday = 5 days)
+  const days = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
+
   const hasAnyData = appointments.length > 0 || eventBlocks.length > 0;
 
   if (isLoading) {
     return (
       <div className="flex-1 overflow-auto animate-fade-in">
-        <div className="inline-flex min-w-full">
+        <div className="flex w-full">
           <TimeColumn />
-          {days.map((day, index) => (
-            <div key={day.toISOString()} className="flex flex-col border-r border-border min-w-[160px]">
+          {days.map((day) => (
+            <div key={day.toISOString()} className="flex-1 flex flex-col border-r border-border last:border-r-0">
               <div className="h-16 border-b border-border bg-card p-3">
                 <Skeleton className="h-4 w-16 mb-2" />
                 <Skeleton className="h-3 w-12" />
@@ -67,11 +68,11 @@ export const CalendarGrid = ({
 
   return (
     <div className="flex-1 overflow-auto animate-fade-in">
-      <div className="inline-flex min-w-full">
+      <div className="flex w-full h-full">
         {/* Time column */}
         <TimeColumn />
-        
-        {/* Day columns */}
+
+        {/* Day columns - flex-1 to fill remaining space equally */}
         {days.map((day, index) => (
           <DayColumn
             key={day.toISOString()}
