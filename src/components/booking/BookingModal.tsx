@@ -59,6 +59,11 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
     }
   }, [appointmentType, selectedPatient]);
 
+  // Check if form has any data entered
+  const hasFormData = () => {
+    return selectedPatient !== null || appointmentType !== '' || reason.trim() !== '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -125,11 +130,30 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
   };
 
   const handleClose = () => {
+    // Check if user has entered data
+    if (hasFormData()) {
+      const confirmed = window.confirm(
+        'You have unsaved changes. Are you sure you want to close?'
+      );
+      if (!confirmed) {
+        return; // Don't close if user cancels
+      }
+    }
+
+    // Clear form and close
     setSelectedPatient(null);
     setAppointmentType('');
     setDuration(30);
     setReason('');
     onClose();
+  };
+
+  // Handle dialog open change (ESC key, click outside)
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // User trying to close dialog
+      handleClose();
+    }
   };
 
   const handlePatientAdded = (patient: any) => {
@@ -141,8 +165,13 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
 
   return (
     <>
-      <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-lg">
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-lg" onPointerDownOutside={(e) => {
+          // Prevent closing when clicking outside if form has data
+          if (hasFormData()) {
+            e.preventDefault();
+          }
+        }}>
           <DialogHeader>
             <DialogTitle>Book Appointment</DialogTitle>
             {slotInfo && (
@@ -151,7 +180,12 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
               </p>
             )}
           </DialogHeader>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} onKeyDown={(e) => {
+            // Prevent Enter key from submitting form unless user is on submit button
+            if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+              e.preventDefault();
+            }
+          }}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Patient *</Label>

@@ -25,6 +25,11 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Check if form has any data entered
+  const hasFormData = () => {
+    return firstName.trim() !== '' || lastName.trim() !== '' || dob !== undefined || phone.trim() !== '' || email.trim() !== '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -66,6 +71,17 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
   };
 
   const handleClose = () => {
+    // Check if user has entered data
+    if (hasFormData()) {
+      const confirmed = window.confirm(
+        'You have unsaved changes. Are you sure you want to close?'
+      );
+      if (!confirmed) {
+        return; // Don't close if user cancels
+      }
+    }
+
+    // Clear form and close
     setFirstName('');
     setLastName('');
     setDob(undefined);
@@ -74,13 +90,34 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
     onClose();
   };
 
+  // Handle dialog open change (ESC key, click outside)
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // User trying to close dialog
+      handleClose();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => {
+        // Prevent closing when clicking outside if form has data
+        if (hasFormData()) {
+          e.preventDefault();
+        }
+      }}>
         <DialogHeader>
           <DialogTitle>Add New Patient</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} onKeyDown={(e) => {
+          // Prevent Enter key from submitting form unless user is on submit button
+          if (e.key === 'Enter' && (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement)) {
+            // Allow Enter on submit button, prevent on other inputs
+            if (!(e.target instanceof HTMLButtonElement && (e.target as HTMLButtonElement).type === 'submit')) {
+              e.preventDefault();
+            }
+          }
+        }}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name *</Label>
