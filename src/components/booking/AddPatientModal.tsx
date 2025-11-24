@@ -22,6 +22,7 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
   const [lastName, setLastName] = useState('');
   const [dob, setDob] = useState<Date>();
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,6 +44,7 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
         last_name: lastName.trim(),
         date_of_birth: format(dob, 'yyyy-MM-dd'),
         phone: phone.trim() || undefined,
+        email: email.trim() || undefined,
       });
 
       toast({
@@ -68,6 +70,7 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
     setLastName('');
     setDob(undefined);
     setPhone('');
+    setEmail('');
     onClose();
   };
 
@@ -131,6 +134,16 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="808-555-1234"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="patient@example.com"
               />
             </div>
           </div>

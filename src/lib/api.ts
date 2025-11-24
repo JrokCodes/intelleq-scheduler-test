@@ -58,6 +58,7 @@ export async function addPatient(patientData: {
   last_name: string;
   date_of_birth: string;
   phone?: string;
+  email?: string;
 }): Promise<any> {
   try {
     const response = await fetch(`${API_BASE_URL}/lovable-add-patient`, {

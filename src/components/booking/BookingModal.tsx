@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,13 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAddPatient, setShowAddPatient] = useState(false);
+
+  // Auto-open Add Patient modal when "New Patient" type is selected and no patient chosen
+  useEffect(() => {
+    if (appointmentType === 'New Patient' && !selectedPatient) {
+      setShowAddPatient(true);
+    }
+  }, [appointmentType, selectedPatient]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
