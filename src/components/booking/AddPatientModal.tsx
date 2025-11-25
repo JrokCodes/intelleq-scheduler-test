@@ -21,21 +21,22 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
   const [dob, setDob] = useState<Date>();
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [insurance, setInsurance] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Check if form has any data entered
   const hasFormData = () => {
-    return firstName.trim() !== '' || lastName.trim() !== '' || dob !== undefined || phone.trim() !== '' || email.trim() !== '';
+    return firstName.trim() !== '' || lastName.trim() !== '' || dob !== undefined || phone.trim() !== '' || email.trim() !== '' || insurance.trim() !== '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!firstName.trim() || !lastName.trim() || !dob) {
+
+    if (!firstName.trim() || !lastName.trim() || !dob || !insurance.trim()) {
       toast({
         title: 'Validation Error',
-        description: 'Please fill in all required fields',
+        description: 'Please fill in all required fields (First Name, Last Name, DOB, and Insurance)',
         variant: 'destructive',
       });
       return;
@@ -49,6 +50,7 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
         date_of_birth: format(dob, 'yyyy-MM-dd'),
         phone: phone.trim() || undefined,
         email: email.trim() || undefined,
+        insurance: insurance.trim(),
       });
 
       toast({
@@ -62,6 +64,7 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
       setDob(undefined);
       setPhone('');
       setEmail('');
+      setInsurance('');
 
       onPatientAdded(patient);
       onClose(); // Close without going through handleClose
@@ -93,6 +96,7 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
     setDob(undefined);
     setPhone('');
     setEmail('');
+    setInsurance('');
     onClose();
   };
 
@@ -173,6 +177,16 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
                 placeholder="patient@example.com"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="insurance">Insurance *</Label>
+              <Input
+                id="insurance"
+                value={insurance}
+                onChange={(e) => setInsurance(e.target.value)}
+                placeholder="Enter patient's insurance carrier"
+                required
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => {
@@ -187,6 +201,7 @@ export const AddPatientModal = ({ open, onClose, onPatientAdded }: AddPatientMod
                   setDob(undefined);
                   setPhone('');
                   setEmail('');
+                  setInsurance('');
                   onClose();
                 }
               } else {

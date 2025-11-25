@@ -62,7 +62,6 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
   const [appointmentType, setAppointmentType] = useState('');
   const [duration, setDuration] = useState(30);
   const [reason, setReason] = useState('');
-  const [insurance, setInsurance] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAddPatient, setShowAddPatient] = useState(false);
 
@@ -82,16 +81,16 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
 
   // Check if form has any data entered
   const hasFormData = () => {
-    return selectedPatient !== null || appointmentType !== '' || reason.trim() !== '' || insurance.trim() !== '';
+    return selectedPatient !== null || appointmentType !== '' || reason.trim() !== '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedPatient || !appointmentType || !insurance.trim() || !slotInfo) {
+    if (!selectedPatient || !appointmentType || !slotInfo) {
       toast({
         title: 'Validation Error',
-        description: 'Please fill in all required fields (Patient, Appointment Type, and Insurance)',
+        description: 'Please fill in all required fields (Patient and Appointment Type)',
         variant: 'destructive',
       });
       return;
@@ -130,7 +129,6 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
         duration_minutes: duration,
         appointment_type: appointmentType,
         reason: reason.trim() || '',
-        insurance: insurance.trim(),
       });
 
       toast({
@@ -143,7 +141,6 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
       setAppointmentType('');
       setDuration(30);
       setReason('');
-      setInsurance('');
 
       onClose(); // Close without going through handleClose
       onBookingSuccess();
@@ -174,7 +171,6 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
     setAppointmentType('');
     setDuration(30);
     setReason('');
-    setInsurance('');
     onClose();
   };
 
@@ -191,7 +187,7 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
     setShowAddPatient(false);
   };
 
-  const isFormValid = selectedPatient && appointmentType && insurance.trim();
+  const isFormValid = selectedPatient && appointmentType;
 
   return (
     <>
@@ -268,17 +264,6 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
                   placeholder="Reason for visit (optional)"
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="insurance">Insurance *</Label>
-                <Input
-                  id="insurance"
-                  value={insurance}
-                  onChange={(e) => setInsurance(e.target.value)}
-                  placeholder="Enter patient's insurance carrier"
-                  required
-                />
-              </div>
             </div>
 
             <div className="flex gap-2 justify-end">
@@ -293,7 +278,6 @@ export const BookingModal = ({ open, onClose, slotInfo, onBookingSuccess }: Book
                     setAppointmentType('');
                     setDuration(30);
                     setReason('');
-                    setInsurance('');
                     onClose();
                   }
                 } else {
