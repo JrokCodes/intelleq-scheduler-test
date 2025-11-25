@@ -118,6 +118,7 @@ export async function createAppointment(appointmentData: {
   duration_minutes: number;
   appointment_type: string;
   reason: string;
+  insurance: string;
 }): Promise<any> {
   const url = `${API_BASE_URL}/lovable-create-appointment`;
 
