@@ -50,7 +50,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
     });
   }, [eventBlocks, date]);
 
-  // Filter booking in progress for this day
+// Filter booking in progress for this day
   const dayBookingInProgress = useMemo(() => {
     const dateString = format(date, 'yyyy-MM-dd');
     return bookingInProgress.filter(block => block.block_date === dateString);
@@ -205,6 +205,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                   </div>
                 );
               })}
+
             </div>
           );
         })}
