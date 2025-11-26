@@ -27,9 +27,19 @@ export interface Holiday {
   date: string;
 }
 
+export interface BookingInProgress {
+  id: string;
+  block_date: string;
+  block_time: string;
+  duration_minutes: number;
+  call_id: string;
+  created_at: string;
+}
+
 export interface ApiResponse {
   success: boolean;
   appointments: Appointment[];
   event_blocks: EventBlock[];
   holidays: Holiday[];
+  booking_in_progress: BookingInProgress[];
 }

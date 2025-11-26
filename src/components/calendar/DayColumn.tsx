@@ -2,9 +2,10 @@ import { format, isSameDay } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PROVIDERS, TIME_SLOTS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import { Appointment, EventBlock, Holiday } from '@/types/calendar';
+import { Appointment, EventBlock, Holiday, BookingInProgress } from '@/types/calendar';
 import { AppointmentCard } from './AppointmentCard';
 import { EventBlockCard } from './EventBlockCard';
+import { BookingInProgressCard } from './BookingInProgressCard';
 import { useMemo } from 'react';
 
 interface DayColumnProps {
@@ -13,6 +14,7 @@ interface DayColumnProps {
   appointments: Appointment[];
   eventBlocks: EventBlock[];
   holidays: Holiday[];
+  bookingInProgress: BookingInProgress[];
   onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
   onAppointmentClick?: (appointment: Appointment) => void;
   onEventBlockClick?: (eventBlock: EventBlock) => void;
@@ -22,7 +24,7 @@ interface DayColumnProps {
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, bookingInProgress, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -47,6 +49,32 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
       return isSameDay(eventStartHST, date);
     });
   }, [eventBlocks, date]);
+
+  // Filter booking in progress for this day
+  const dayBookingInProgress = useMemo(() => {
+    const dateString = format(date, 'yyyy-MM-dd');
+    return bookingInProgress.filter(block => block.block_date === dateString);
+  }, [bookingInProgress, date]);
+
+  // Helper to check if a slot time falls within a booking in progress range
+  const isSlotBlockedByBooking = (slotHours: number, slotMinutes: number) => {
+    const slotTotalMinutes = slotHours * 60 + slotMinutes;
+    return dayBookingInProgress.some(block => {
+      const [blockHours, blockMins] = block.block_time.split(':').map(Number);
+      const blockStartMinutes = blockHours * 60 + blockMins;
+      const blockEndMinutes = blockStartMinutes + block.duration_minutes;
+      return slotTotalMinutes >= blockStartMinutes && slotTotalMinutes < blockEndMinutes;
+    });
+  };
+
+  // Calculate position for booking in progress blocks
+  const getPositionForBooking = (block: BookingInProgress) => {
+    const [hours, minutes] = block.block_time.split(':').map(Number);
+    // Calendar starts at 7:00 AM
+    const totalMinutesFromStart = (hours - 7) * 60 + minutes;
+    const slotIndex = totalMinutesFromStart / 15;
+    return slotIndex * SLOT_HEIGHT;
+  };
 
   // Calculate position for appointments and events
   const getPositionForTime = (timeStr: string) => {
@@ -181,6 +209,25 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
           );
         })}
 
+        {/* Booking in progress overlays - full width to block both providers */}
+        {dayBookingInProgress.map(block => {
+          const topPosition = getPositionForBooking(block);
+
+          return (
+            <div
+              key={block.id}
+              style={{
+                top: `${topPosition}px`,
+                left: 0,
+                right: 0
+              }}
+              className="absolute z-20"
+            >
+              <BookingInProgressCard booking={block} slotHeight={SLOT_HEIGHT} />
+            </div>
+          );
+        })}
+
         {/* Time slot grid cells */}
         <div className="flex flex-col">
           {TIME_SLOTS.map((slot, slotIndex) => (
@@ -223,7 +270,10 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                   return slotTotalMinutes >= eventStartMinutes && slotTotalMinutes < eventEndMinutes;
                 });
 
-                const isClickable = !slot.isLunchTime && !hasAppointment && !hasEvent;
+                // Check if slot is blocked by booking in progress
+                const hasBookingInProgress = isSlotBlockedByBooking(slotHours, slotMinutes);
+
+                const isClickable = !slot.isLunchTime && !hasAppointment && !hasEvent && !hasBookingInProgress;
 
                 const handleSlotClick = () => {
                   if (isClickable) {

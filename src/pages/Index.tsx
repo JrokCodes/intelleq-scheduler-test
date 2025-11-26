@@ -10,7 +10,7 @@ import { EventBlockDetailModal } from '@/components/calendar/EventBlockDetailMod
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 import { fetchAppointments } from '@/lib/api';
-import { Appointment, EventBlock, Holiday } from '@/types/calendar';
+import { Appointment, EventBlock, Holiday, BookingInProgress } from '@/types/calendar';
 import { RefreshCw } from 'lucide-react';
 
 const Index = () => {
@@ -21,6 +21,7 @@ const Index = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [eventBlocks, setEventBlocks] = useState<EventBlock[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [bookingInProgress, setBookingInProgress] = useState<BookingInProgress[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
@@ -80,6 +81,7 @@ const Index = () => {
         setAppointments(data.appointments);
         setEventBlocks(data.event_blocks || []);
         setHolidays(data.holidays || []);
+        setBookingInProgress(data.booking_in_progress || []);
         setLastUpdated(new Date());
         
         setDebugInfo(prev => ({
@@ -251,6 +253,7 @@ const Index = () => {
           appointments={appointments}
           eventBlocks={eventBlocks}
           holidays={holidays}
+          bookingInProgress={bookingInProgress}
           isLoading={isLoading}
           onSlotClick={handleSlotClick}
           onAppointmentClick={handleAppointmentClick}

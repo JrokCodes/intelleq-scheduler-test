@@ -2,7 +2,7 @@ import { addDays, format, isToday } from 'date-fns';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import { TimeColumn } from './TimeColumn';
 import { DayColumn } from './DayColumn';
-import { Appointment, EventBlock, Holiday } from '@/types/calendar';
+import { Appointment, EventBlock, Holiday, BookingInProgress } from '@/types/calendar';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface CalendarGridProps {
@@ -10,6 +10,7 @@ interface CalendarGridProps {
   appointments: Appointment[];
   eventBlocks: EventBlock[];
   holidays: Holiday[];
+  bookingInProgress: BookingInProgress[];
   isLoading: boolean;
   onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
   onAppointmentClick?: (appointment: Appointment) => void;
@@ -21,6 +22,7 @@ export const CalendarGrid = ({
   appointments,
   eventBlocks,
   holidays,
+  bookingInProgress,
   isLoading,
   onSlotClick,
   onAppointmentClick,
@@ -81,6 +83,7 @@ export const CalendarGrid = ({
             appointments={appointments}
             eventBlocks={eventBlocks}
             holidays={holidays}
+            bookingInProgress={bookingInProgress}
             onSlotClick={onSlotClick}
             onAppointmentClick={onAppointmentClick}
             onEventBlockClick={onEventBlockClick}
