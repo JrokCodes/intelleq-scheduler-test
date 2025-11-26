@@ -2,9 +2,10 @@ import { format, isSameDay } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { PROVIDERS, TIME_SLOTS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
-import { Appointment, EventBlock, Holiday } from '@/types/calendar';
+import { Appointment, EventBlock, Holiday, BookingInProgress } from '@/types/calendar';
 import { AppointmentCard } from './AppointmentCard';
 import { EventBlockCard } from './EventBlockCard';
+import { BookingInProgressSlot } from './BookingInProgressSlot';
 import { useMemo } from 'react';
 
 interface DayColumnProps {
@@ -13,6 +14,7 @@ interface DayColumnProps {
   appointments: Appointment[];
   eventBlocks: EventBlock[];
   holidays: Holiday[];
+  bookingInProgress: BookingInProgress[];
   onSlotClick: (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => void;
   onAppointmentClick?: (appointment: Appointment) => void;
   onEventBlockClick?: (eventBlock: EventBlock) => void;
@@ -22,7 +24,7 @@ interface DayColumnProps {
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, bookingInProgress, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -47,6 +49,11 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
       return isSameDay(eventStartHST, date);
     });
   }, [eventBlocks, date]);
+
+  const dayBookingInProgress = useMemo(() => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return bookingInProgress.filter(booking => booking.block_date === dateStr);
+  }, [bookingInProgress, date]);
 
   // Calculate position for appointments and events
   const getPositionForTime = (timeStr: string) => {
@@ -177,6 +184,33 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                   </div>
                 );
               })}
+
+              {/* Booking in progress slots for this provider */}
+              {dayBookingInProgress.map(booking => {
+                // Parse block_time (format: "09:00:00")
+                const timeParts = booking.block_time.split(':');
+                const hours = parseInt(timeParts[0]);
+                const minutes = parseInt(timeParts[1]);
+                
+                // Create a date string in the same format as appointments
+                const bookingDateStr = `${booking.block_date}T${booking.block_time}`;
+                const topPosition = getPositionForTime(bookingDateStr);
+                const leftPosition = providerIndex * 50;
+
+                return (
+                  <div
+                    key={booking.id}
+                    style={{
+                      top: `${topPosition}px`,
+                      left: `${leftPosition}%`,
+                      width: '50%'
+                    }}
+                    className="absolute"
+                  >
+                    <BookingInProgressSlot booking={booking} slotHeight={SLOT_HEIGHT} />
+                  </div>
+                );
+              })}
             </div>
           );
         })}
@@ -223,7 +257,18 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                   return slotTotalMinutes >= eventStartMinutes && slotTotalMinutes < eventEndMinutes;
                 });
 
-                const isClickable = !slot.isLunchTime && !hasAppointment && !hasEvent;
+                // Check booking in progress slots
+                const hasBookingInProgress = dayBookingInProgress.some(booking => {
+                  const timeParts = booking.block_time.split(':');
+                  const bookingHours = parseInt(timeParts[0]);
+                  const bookingMinutes = parseInt(timeParts[1]);
+                  const bookingStartMinutes = bookingHours * 60 + bookingMinutes;
+                  const bookingEndMinutes = bookingStartMinutes + booking.duration_minutes;
+                  const slotTotalMinutes = slotHours * 60 + slotMinutes;
+                  return slotTotalMinutes >= bookingStartMinutes && slotTotalMinutes < bookingEndMinutes;
+                });
+
+                const isClickable = !slot.isLunchTime && !hasAppointment && !hasEvent && !hasBookingInProgress;
 
                 const handleSlotClick = () => {
                   if (isClickable) {
