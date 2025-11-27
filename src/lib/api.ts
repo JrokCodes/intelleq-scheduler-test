@@ -1,7 +1,7 @@
 import { ApiResponse } from '@/types/calendar';
 
 const API_BASE_URL = 'https://intelleqn8n.net/webhook';
-const API_KEY = 'LovableStaffCalendar2025';
+const API_KEY = 'IntelleQ_Lvbl_2025_xK9mPqR3vT7wZ2nL';
 
 export async function fetchAppointments(startDate: string, endDate: string) {
   const url = `${API_BASE_URL}/lovable-appointments?start_date=${startDate}&end_date=${endDate}`;
