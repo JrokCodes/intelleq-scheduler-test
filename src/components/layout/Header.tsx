@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, Clock } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, Clock, HelpCircle } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { DatePickerModal } from '@/components/calendar/DatePickerModal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface HeaderProps {
   currentWeekStart: Date;
@@ -19,6 +20,7 @@ interface HeaderProps {
 
 export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, onBlockTime, onJumpToToday, isRefreshing }: HeaderProps) => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 });
   const weekRange = `${format(currentWeekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
@@ -116,6 +118,15 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, on
           </Button>
           <Button
             variant="outline"
+            size="icon"
+            onClick={() => setHelpOpen(true)}
+            className="h-9 w-9 border-border hover:bg-accent"
+            title="Help & Quick Reference"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
             size="sm"
             onClick={handleLogout}
             className="border-border hover:bg-accent"
@@ -133,6 +144,111 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, on
         title="Jump to Date"
         selectedDate={currentWeekStart}
       />
+
+      <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto sm:max-w-2xl max-sm:max-w-full max-sm:h-full max-sm:max-h-full">
+          <DialogHeader>
+            <DialogTitle>IntelleQ Calendar - Quick Guide</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 text-sm">
+            {/* System Overview */}
+            <div>
+              <h3 className="font-semibold mb-2">System Overview</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-border">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="border border-border px-3 py-2 text-left">System</th>
+                      <th className="border border-border px-3 py-2 text-left">Purpose</th>
+                      <th className="border border-border px-3 py-2 text-left">When to Use</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-border px-3 py-2 font-medium">Akamai</td>
+                      <td className="border border-border px-3 py-2">Billing/EHR, today's schedule</td>
+                      <td className="border border-border px-3 py-2">Same-day appointments</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-2 font-medium">IntelleQ</td>
+                      <td className="border border-border px-3 py-2">Future appointments</td>
+                      <td className="border border-border px-3 py-2">Booking/rescheduling future</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Daily Workflow */}
+            <div>
+              <h3 className="font-semibold mb-2">Daily Workflow</h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Morning: Check Akamai for today</li>
+                <li>During day: Use IntelleQ for future</li>
+                <li>End of day: AI bookings auto-sync</li>
+              </ul>
+            </div>
+
+            {/* Quick Reference */}
+            <div>
+              <h3 className="font-semibold mb-2">Quick Reference</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-border">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="border border-border px-3 py-2 text-left">Scenario</th>
+                      <th className="border border-border px-3 py-2 text-left">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="border border-border px-3 py-2">Same-day NEW booking</td>
+                      <td className="border border-border px-3 py-2">Akamai only</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-2">Same-day RESCHEDULE</td>
+                      <td className="border border-border px-3 py-2">Delete IntelleQ → Add Akamai</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-2">Future booking</td>
+                      <td className="border border-border px-3 py-2">IntelleQ Calendar</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-2">Cancel future appt</td>
+                      <td className="border border-border px-3 py-2">Delete from IntelleQ</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-2">Red pulsing slot</td>
+                      <td className="border border-border px-3 py-2">AI booking - wait 30 sec</td>
+                    </tr>
+                    <tr>
+                      <td className="border border-border px-3 py-2">Robot badge</td>
+                      <td className="border border-border px-3 py-2">AI-booked (treat same)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Key Rules */}
+            <div>
+              <h3 className="font-semibold mb-2">Key Rules</h3>
+              <ol className="list-decimal pl-5 space-y-1">
+                <li>IntelleQ = future only</li>
+                <li>Akamai = today + billing</li>
+                <li>Red pulsing = don't click</li>
+                <li>Check both to avoid double-booking</li>
+              </ol>
+            </div>
+
+            {/* Login Info */}
+            <div className="pt-4 border-t border-border text-muted-foreground">
+              <p className="text-xs">Login: intelleq2025</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 };
