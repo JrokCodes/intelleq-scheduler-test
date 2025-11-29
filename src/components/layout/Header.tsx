@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, Clock, HelpCircle } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, Clock, HelpCircle, FileText } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { DatePickerModal } from '@/components/calendar/DatePickerModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useNavigate } from 'react-router-dom';
 interface HeaderProps {
   currentWeekStart: Date;
   onWeekChange: (date: Date) => void;
@@ -25,6 +26,7 @@ export const Header = ({
   onJumpToToday,
   isRefreshing
 }: HeaderProps) => {
+  const navigate = useNavigate();
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const weekEnd = endOfWeek(currentWeekStart, {
@@ -86,6 +88,9 @@ export const Header = ({
           <Button variant="outline" size="sm" onClick={onRefresh} disabled={isRefreshing} className="border-border hover:bg-accent">
             <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
             Refresh
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => navigate('/docs')} className="h-9 w-9 border-border hover:bg-accent" title="Documentation">
+            <FileText className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="icon" onClick={() => setHelpOpen(true)} className="h-9 w-9 border-border hover:bg-accent" title="Help & Quick Reference">
             <HelpCircle className="h-4 w-4" />
@@ -170,6 +175,14 @@ export const Header = ({
             {/* Login Info */}
             <div className="pt-4 border-t border-border text-muted-foreground">
               <p className="text-xs">Login: intelleq2025</p>
+            </div>
+
+            {/* Full Documentation Link */}
+            <div className="pt-4 border-t border-border">
+              <Button variant="link" className="w-full" onClick={() => { setHelpOpen(false); navigate('/docs'); }}>
+                <FileText className="h-4 w-4 mr-2" />
+                View Full Documentation
+              </Button>
             </div>
           </div>
         </DialogContent>
