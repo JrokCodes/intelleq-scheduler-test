@@ -148,7 +148,7 @@ export const Header = ({
                       <td className="border border-border px-3 py-2">AI booking - Don't book slot </td>
                     </tr>
                     <tr>
-                      <td className="border border-border px-3 py-2">Robot badge</td>
+                      <td className="border border-border px-3 py-2">Robot badge 🤖   </td>
                       <td className="border border-border px-3 py-2">AI-booked (treat same)</td>
                     </tr>
                   </tbody>
