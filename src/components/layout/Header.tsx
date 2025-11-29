@@ -152,41 +152,12 @@ export const Header = ({ currentWeekStart, onWeekChange, onLogout, onRefresh, on
           </DialogHeader>
           
           <div className="space-y-6 text-sm">
-            {/* System Overview */}
-            <div>
-              <h3 className="font-semibold mb-2">System Overview</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-border">
-                  <thead>
-                    <tr className="bg-muted">
-                      <th className="border border-border px-3 py-2 text-left">System</th>
-                      <th className="border border-border px-3 py-2 text-left">Purpose</th>
-                      <th className="border border-border px-3 py-2 text-left">When to Use</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-border px-3 py-2 font-medium">Akamai</td>
-                      <td className="border border-border px-3 py-2">Billing/EHR, today's schedule</td>
-                      <td className="border border-border px-3 py-2">Same-day appointments</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-border px-3 py-2 font-medium">IntelleQ</td>
-                      <td className="border border-border px-3 py-2">Future appointments</td>
-                      <td className="border border-border px-3 py-2">Booking/rescheduling future</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
             {/* Daily Workflow */}
             <div>
               <h3 className="font-semibold mb-2">Daily Workflow</h3>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Morning: Check Akamai for today</li>
                 <li>During day: Use IntelleQ for future</li>
-                <li>End of day: AI bookings auto-sync</li>
               </ul>
             </div>
 
