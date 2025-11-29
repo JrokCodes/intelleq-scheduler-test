@@ -162,7 +162,7 @@ export const Header = ({
               <ol className="list-decimal pl-5 space-y-1">
                 <li>IntelleQ = future only (Any days after today)     </li>
                 <li>Akamai = today + billing</li>
-                <li>Red pulsing = don't click</li>
+                <li>Red pulsing = don't book </li>
                 <li>Check both to avoid double-booking</li>
               </ol>
             </div>
