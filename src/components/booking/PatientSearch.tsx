@@ -69,6 +69,7 @@ export const PatientSearch = ({
           {selectedPatient.first_name} {selectedPatient.last_name} (DOB: {selectedPatient.date_of_birth})
         </span>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           onClick={onClearSelection}
@@ -107,6 +108,7 @@ export const PatientSearch = ({
             <div className="py-1">
               {patients.map((patient) => (
                 <button
+                  type="button"
                   key={patient.patient_id}
                   onClick={() => handleSelectPatient(patient)}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition-colors"
@@ -120,6 +122,7 @@ export const PatientSearch = ({
       )}
 
       <Button
+        type="button"
         variant="outline"
         size="sm"
         onClick={onAddNewPatient}
