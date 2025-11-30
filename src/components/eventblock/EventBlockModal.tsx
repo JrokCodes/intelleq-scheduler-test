@@ -5,14 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { createEventBlock } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { PROVIDERS } from '@/lib/constants';
+import { DatePickerModal } from '@/components/calendar/DatePickerModal';
 
 const EVENT_TYPES = [
   'Lunch',
@@ -191,32 +190,30 @@ export const EventBlockModal = ({ open, onClose, onSuccess, defaultDate }: Event
             {/* Date */}
             <div className="space-y-2">
               <Label>Date *</Label>
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, 'PPP') : 'Select date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(d) => {
-                      setDate(d);
-                      setDatePickerOpen(false);
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+                onClick={() => setDatePickerOpen(true)}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, 'PPP') : 'Select date'}
+              </Button>
             </div>
+
+            <DatePickerModal
+              open={datePickerOpen}
+              onClose={() => setDatePickerOpen(false)}
+              onDateSelect={(selectedDate) => {
+                setDate(selectedDate);
+                setDatePickerOpen(false);
+              }}
+              title="Select Event Date"
+              selectedDate={date}
+            />
 
             {/* Time Selection */}
             <div className="grid grid-cols-2 gap-4">
