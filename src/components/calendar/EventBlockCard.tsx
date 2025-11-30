@@ -31,8 +31,8 @@ export const EventBlockCard = ({ eventBlock, slotHeight, onClick }: EventBlockCa
       onClick={handleClick}
       className={cn(
         "absolute left-0.5 right-0.5 rounded-md p-1.5 overflow-hidden",
-        "bg-slate-700/80 border border-slate-600",
-        "cursor-pointer hover:bg-slate-600/80 transition-colors",
+        "bg-violet-500/30 border border-violet-400/50",
+        "cursor-pointer hover:bg-violet-400/40 transition-colors",
         "event-block-stripes"
       )}
       style={{
