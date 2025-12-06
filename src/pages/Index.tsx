@@ -73,7 +73,7 @@ const Index = () => {
       const startDate = format(currentWeekStart, 'yyyy-MM-dd');
       const endDate = format(weekEnd, 'yyyy-MM-dd');
       
-      const apiUrl = `https://intelleqn8n.net/webhook/lovable-appointments?start_date=${startDate}&end_date=${endDate}`;
+      const apiUrl = `https://api.intelleqn8n.net/quinio/appointments?start_date=${startDate}&end_date=${endDate}`;
       
       setDebugInfo(prev => ({
         ...prev,
