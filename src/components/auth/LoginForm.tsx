@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AUTH_PASSWORD, AUTH_STORAGE_KEY } from '@/lib/constants';
-import { LockKeyhole } from 'lucide-react';
+import { login } from '@/lib/auth';
+import { LockKeyhole, Loader2 } from 'lucide-react';
 
 interface LoginFormProps {
   onLogin: () => void;
@@ -12,16 +12,27 @@ interface LoginFormProps {
 export const LoginForm = ({ onLogin }: LoginFormProps) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (password === AUTH_PASSWORD) {
-      localStorage.setItem(AUTH_STORAGE_KEY, 'true');
-      onLogin();
-    } else {
-      setError('Incorrect password. Please try again.');
+    setError('');
+    setLoading(true);
+
+    try {
+      const result = await login(password);
+
+      if (result.success) {
+        onLogin();
+      } else {
+        setError(result.message || 'Incorrect password. Please try again.');
+        setPassword('');
+      }
+    } catch (err) {
+      setError('Unable to connect to server. Please try again.');
       setPassword('');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,16 +63,25 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                 }}
                 className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                 autoFocus
+                disabled={loading}
               />
               {error && (
                 <p className="text-sm text-destructive">{error}</p>
               )}
             </div>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              disabled={loading || !password}
             >
-              Enter
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                'Enter'
+              )}
             </Button>
           </form>
         </CardContent>

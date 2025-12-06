@@ -29,5 +29,7 @@ export const DAYS_OF_WEEK = [
   'Friday',
 ] as const;
 
-export const AUTH_PASSWORD = 'intelleq2025';
-export const AUTH_STORAGE_KEY = 'intelleq_auth';
+// Authentication
+export const API_BASE_URL = 'https://api.intelleqn8n.net';
+export const AUTH_TOKEN_KEY = 'quinio_auth_token';
+export const AUTH_PRACTICE = 'quinio';

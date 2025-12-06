@@ -1,56 +1,69 @@
-import { ApiResponse } from '@/types/calendar';
+/**
+ * API functions for Quinio Staff Calendar
+ *
+ * Uses Python backend with JWT authentication
+ * Backend URL: https://api.intelleqn8n.net
+ */
 
-const API_BASE_URL = 'https://intelleqn8n.net/webhook';
-const API_KEY = 'IntelleQ_Lvbl_2025_xK9mPqR3vT7wZ2nL';
+import { API_BASE_URL } from './constants';
+import { getAuthHeaders, logout } from './auth';
 
-export async function fetchAppointments(startDate: string, endDate: string) {
-  const url = `${API_BASE_URL}/lovable-appointments?start_date=${startDate}&end_date=${endDate}`;
-  
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': API_KEY,
-    },
-  });
+/**
+ * Handle API response - check for auth errors
+ */
+async function handleResponse(response: Response) {
+  if (response.status === 401) {
+    // Token expired or invalid - logout and redirect
+    logout();
+    window.location.reload();
+    throw new Error('Session expired. Please login again.');
+  }
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || `API error: ${response.status}`);
   }
 
-  const responseText = await response.text();
-  
-  try {
-    const data = JSON.parse(responseText);
-    return data;
-  } catch (parseError) {
-    console.error('Failed to parse API response:', parseError);
-    throw new Error('Failed to parse API response as JSON');
+  return response.json();
+}
+
+/**
+ * Get headers for API requests (includes auth token)
+ */
+function getHeaders(includeContentType = false): Record<string, string> {
+  const headers: Record<string, string> = {
+    ...getAuthHeaders()
+  };
+
+  if (includeContentType) {
+    headers['Content-Type'] = 'application/json';
   }
+
+  return headers;
+}
+
+export async function fetchAppointments(startDate: string, endDate: string) {
+  const params = new URLSearchParams({
+    start_date: startDate,
+    end_date: endDate,
+  });
+
+  const response = await fetch(`${API_BASE_URL}/quinio/appointments?${params}`, {
+    headers: getHeaders(),
+  });
+
+  return handleResponse(response);
 }
 
 export async function searchPatients(query: string): Promise<any[]> {
-  try {
-    const url = `${API_BASE_URL}/lovable-search-patients?query=${encodeURIComponent(query)}`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'X-API-Key': API_KEY,
-        'Content-Type': 'application/json',
-      },
-    });
+  const params = new URLSearchParams({ query });
 
-    if (!response.ok) {
-      throw new Error(`Search failed: ${response.status} ${response.statusText}`);
-    }
+  const response = await fetch(`${API_BASE_URL}/quinio/patients?${params}`, {
+    headers: getHeaders(),
+  });
 
-    const data = await response.json();
-    return data.patients || [];
-  } catch (error) {
-    console.error('Error searching patients:', error);
-    throw error;
-  }
+  const data = await handleResponse(response);
+  return data.patients || [];
 }
 
 export async function addPatient(patientData: {
@@ -69,52 +82,28 @@ export async function addPatient(patientData: {
   secondary_insurance?: string;
   secondary_subscriber_id?: string;
 }): Promise<any> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/lovable-add-patient`, {
-      method: 'POST',
-      headers: {
-        'X-API-Key': API_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(patientData),
-    });
+  const response = await fetch(`${API_BASE_URL}/quinio/patients`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: JSON.stringify(patientData),
+  });
 
-    if (!response.ok) {
-      throw new Error(`Failed to add patient: ${response.status} ${response.statusText}`);
-    }
+  const data = await handleResponse(response);
 
-    const data = await response.json();
-
-    // Check if the API returned an error (e.g., duplicate patient)
-    if (data.success === false) {
-      throw new Error(data.error || 'Failed to add patient');
-    }
-
-    return data.patient;
-  } catch (error) {
-    console.error('Error adding patient:', error);
-    throw error;
+  if (data.success === false) {
+    throw new Error(data.error || 'Failed to add patient');
   }
+
+  return data.patient;
 }
 
 export async function deleteAppointment(appointmentId: string): Promise<any> {
-  const url = `${API_BASE_URL}/lovable-delete-appointment?id=${appointmentId}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}/quinio/appointments/${appointmentId}`, {
     method: 'DELETE',
-    headers: {
-      'X-API-Key': API_KEY,
-      'Content-Type': 'application/json',
-    },
+    headers: getHeaders(),
   });
 
-  const data = await response.json();
-
-  if (!response.ok || data.error) {
-    throw new Error(data.error || 'Failed to delete appointment');
-  }
-
-  return data;
+  return handleResponse(response);
 }
 
 export async function createAppointment(appointmentData: {
@@ -128,33 +117,16 @@ export async function createAppointment(appointmentData: {
   appointment_type: string;
   reason: string;
 }): Promise<any> {
-  const url = `${API_BASE_URL}/lovable-create-appointment`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}/quinio/appointments`, {
     method: 'POST',
-    headers: {
-      'X-API-Key': API_KEY,
-      'Content-Type': 'application/json',
-    },
+    headers: getHeaders(true),
     body: JSON.stringify(appointmentData),
   });
 
-  const responseText = await response.text();
+  const data = await handleResponse(response);
 
-  if (!responseText || responseText.trim() === '') {
-    throw new Error(`API returned empty response (status: ${response.status}). The n8n workflow may not be configured correctly.`);
-  }
-
-  let data;
-  try {
-    data = JSON.parse(responseText);
-  } catch (parseError) {
-    console.error('JSON parse error:', parseError);
-    throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
-  }
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.error || `Failed to create appointment (status: ${response.status})`);
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to create appointment');
   }
 
   return data.appointment;
@@ -167,66 +139,26 @@ export async function createEventBlock(eventBlockData: {
   end_time: string;
   notes?: string;
 }): Promise<any> {
-  const url = `${API_BASE_URL}/lovable-create-event-block`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}/quinio/event-blocks`, {
     method: 'POST',
-    headers: {
-      'X-API-Key': API_KEY,
-      'Content-Type': 'application/json',
-    },
+    headers: getHeaders(true),
     body: JSON.stringify(eventBlockData),
   });
 
-  const responseText = await response.text();
+  const data = await handleResponse(response);
 
-  if (!responseText || responseText.trim() === '') {
-    throw new Error(`API returned empty response (status: ${response.status}). The n8n workflow may not be configured correctly.`);
-  }
-
-  let data;
-  try {
-    data = JSON.parse(responseText);
-  } catch (parseError) {
-    console.error('JSON parse error:', parseError);
-    throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
-  }
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.error || `Failed to create event block (status: ${response.status})`);
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to create event block');
   }
 
   return data.event_block;
 }
 
 export async function deleteEventBlock(eventBlockId: string): Promise<any> {
-  const url = `${API_BASE_URL}/lovable-delete-event-block?id=${eventBlockId}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}/quinio/event-blocks/${eventBlockId}`, {
     method: 'DELETE',
-    headers: {
-      'X-API-Key': API_KEY,
-      'Content-Type': 'application/json',
-    },
+    headers: getHeaders(),
   });
 
-  const responseText = await response.text();
-
-  if (!responseText || responseText.trim() === '') {
-    throw new Error(`API returned empty response (status: ${response.status}).`);
-  }
-
-  let data;
-  try {
-    data = JSON.parse(responseText);
-  } catch (parseError) {
-    console.error('JSON parse error:', parseError);
-    throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}`);
-  }
-
-  if (!response.ok || data.error) {
-    throw new Error(data.error || 'Failed to delete event block');
-  }
-
-  return data;
+  return handleResponse(response);
 }

@@ -7,7 +7,7 @@ import { BookingModal } from '@/components/booking/BookingModal';
 import { AppointmentDetailModal } from '@/components/calendar/AppointmentDetailModal';
 import { EventBlockModal } from '@/components/eventblock/EventBlockModal';
 import { EventBlockDetailModal } from '@/components/calendar/EventBlockDetailModal';
-import { AUTH_STORAGE_KEY } from '@/lib/constants';
+import { isAuthenticated as checkAuth, verifyToken, logout } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { fetchAppointments } from '@/lib/api';
 import { Appointment, EventBlock, Holiday, BookingInProgress } from '@/types/calendar';
@@ -50,10 +50,17 @@ const Index = () => {
   });
   const { toast } = useToast();
 
-  // Check auth on mount
+  // Check auth on mount - verify token is still valid
   useEffect(() => {
-    const isAuth = localStorage.getItem(AUTH_STORAGE_KEY) === 'true';
-    setIsAuthenticated(isAuth);
+    const checkAuthentication = async () => {
+      if (checkAuth()) {
+        const isValid = await verifyToken();
+        setIsAuthenticated(isValid);
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuthentication();
   }, []);
 
   // Fetch appointments function
@@ -180,6 +187,7 @@ const Index = () => {
   };
 
   const handleLogout = () => {
+    logout();
     setIsAuthenticated(false);
   };
 
