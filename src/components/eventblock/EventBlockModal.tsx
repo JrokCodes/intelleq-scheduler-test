@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,18 +47,29 @@ interface EventBlockModalProps {
   onClose: () => void;
   onSuccess: () => void;
   defaultDate?: Date;
+  defaultProvider?: string;
+  defaultTime?: string;
 }
 
-export const EventBlockModal = ({ open, onClose, onSuccess, defaultDate }: EventBlockModalProps) => {
-  const [provider, setProvider] = useState('');
+export const EventBlockModal = ({ open, onClose, onSuccess, defaultDate, defaultProvider, defaultTime }: EventBlockModalProps) => {
+  const [provider, setProvider] = useState(defaultProvider || '');
   const [eventType, setEventType] = useState('');
   const [customEventName, setCustomEventName] = useState('');
   const [date, setDate] = useState<Date | undefined>(defaultDate || new Date());
-  const [startTime, setStartTime] = useState('');
+  const [startTime, setStartTime] = useState(defaultTime || '');
   const [endTime, setEndTime] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+
+  // Update state when modal opens with new defaults
+  useEffect(() => {
+    if (open) {
+      setProvider(defaultProvider || '');
+      setDate(defaultDate || new Date());
+      setStartTime(defaultTime || '');
+    }
+  }, [open, defaultProvider, defaultDate, defaultTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

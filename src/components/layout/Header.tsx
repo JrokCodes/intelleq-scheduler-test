@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, Clock, HelpCircle, FileText } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, HelpCircle, FileText } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,6 @@ interface HeaderProps {
   onWeekChange: (date: Date) => void;
   onLogout: () => void;
   onRefresh: () => void;
-  onBlockTime: () => void;
   onJumpToToday: () => void;
   lastUpdated: Date | null;
   isRefreshing: boolean;
@@ -22,7 +21,6 @@ export const Header = ({
   onWeekChange,
   onLogout,
   onRefresh,
-  onBlockTime,
   onJumpToToday,
   isRefreshing
 }: HeaderProps) => {
@@ -80,10 +78,6 @@ export const Header = ({
         <div className="flex-1 flex items-center justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onJumpToToday} className="border-border hover:bg-accent">
             Today
-          </Button>
-          <Button variant="outline" size="sm" onClick={onBlockTime} className="border-border hover:bg-accent">
-            <Clock className="h-4 w-4 mr-2" />
-            Block Time
           </Button>
           <Button variant="outline" size="sm" onClick={onRefresh} disabled={isRefreshing} className="border-border hover:bg-accent">
             <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />

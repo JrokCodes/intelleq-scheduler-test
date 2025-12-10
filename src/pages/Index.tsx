@@ -7,11 +7,26 @@ import { BookingModal } from '@/components/booking/BookingModal';
 import { AppointmentDetailModal } from '@/components/calendar/AppointmentDetailModal';
 import { EventBlockModal } from '@/components/eventblock/EventBlockModal';
 import { EventBlockDetailModal } from '@/components/calendar/EventBlockDetailModal';
+import { SlotActionDialog } from '@/components/calendar/SlotActionDialog';
 import { isAuthenticated as checkAuth, verifyToken, logout } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { fetchAppointments } from '@/lib/api';
 import { Appointment, EventBlock, Holiday, BookingInProgress } from '@/types/calendar';
 import { RefreshCw } from 'lucide-react';
+
+// Convert time from "9:30 AM" format to "09:30" format for EventBlockModal
+const convertTo24Hour = (time12h: string): string => {
+  const [time, modifier] = time12h.split(' ');
+  let [hours, minutes] = time.split(':');
+
+  if (hours === '12') {
+    hours = modifier === 'AM' ? '00' : '12';
+  } else if (modifier === 'PM') {
+    hours = String(parseInt(hours, 10) + 12);
+  }
+
+  return `${hours.padStart(2, '0')}:${minutes}`;
+};
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,6 +51,7 @@ const Index = () => {
   const [eventBlockModalOpen, setEventBlockModalOpen] = useState(false);
   const [selectedEventBlock, setSelectedEventBlock] = useState<EventBlock | null>(null);
   const [eventBlockDetailModalOpen, setEventBlockDetailModalOpen] = useState(false);
+  const [slotActionDialogOpen, setSlotActionDialogOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [debugInfo, setDebugInfo] = useState<{
     lastApiStatus: string;
@@ -197,7 +213,15 @@ const Index = () => {
 
   const handleSlotClick = (slotInfo: { provider: string; providerName: string; date: Date; time: string }) => {
     setSelectedSlot(slotInfo);
+    setSlotActionDialogOpen(true);
+  };
+
+  const handleCreateAppointmentFromSlot = () => {
     setBookingModalOpen(true);
+  };
+
+  const handleCreateEventBlockFromSlot = () => {
+    setEventBlockModalOpen(true);
   };
 
   const handleAppointmentClick = (appointment: Appointment) => {
@@ -211,10 +235,6 @@ const Index = () => {
 
   const handleDeleteSuccess = () => {
     loadAppointments();
-  };
-
-  const handleBlockTime = () => {
-    setEventBlockModalOpen(true);
   };
 
   const handleEventBlockSuccess = () => {
@@ -241,7 +261,6 @@ const Index = () => {
         onWeekChange={setCurrentWeekStart}
         onLogout={handleLogout}
         onRefresh={handleRefresh}
-        onBlockTime={handleBlockTime}
         onJumpToToday={handleJumpToToday}
         lastUpdated={lastUpdated}
         isRefreshing={isRefreshing}
@@ -286,7 +305,9 @@ const Index = () => {
           open={eventBlockModalOpen}
           onClose={() => setEventBlockModalOpen(false)}
           onSuccess={handleEventBlockSuccess}
-          defaultDate={currentWeekStart}
+          defaultDate={selectedSlot?.date || currentWeekStart}
+          defaultProvider={selectedSlot?.provider}
+          defaultTime={selectedSlot?.time ? convertTo24Hour(selectedSlot.time) : undefined}
         />
 
         <EventBlockDetailModal
@@ -294,6 +315,14 @@ const Index = () => {
           onClose={() => setEventBlockDetailModalOpen(false)}
           eventBlock={selectedEventBlock}
           onDeleteSuccess={handleDeleteSuccess}
+        />
+
+        <SlotActionDialog
+          open={slotActionDialogOpen}
+          onOpenChange={setSlotActionDialogOpen}
+          slotInfo={selectedSlot}
+          onCreateAppointment={handleCreateAppointmentFromSlot}
+          onCreateEventBlock={handleCreateEventBlockFromSlot}
         />
         </div>
       </main>
