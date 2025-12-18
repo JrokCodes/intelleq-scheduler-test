@@ -32,7 +32,7 @@ interface VerifyResponse {
  */
 export async function login(password: string, staffName?: string): Promise<LoginResponse> {
   try {
-    const response = await fetch(\, {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -69,16 +69,16 @@ export async function login(password: string, staffName?: string): Promise<Login
  */
 export async function verifyToken(): Promise<boolean> {
   const token = getToken();
-  if (\!token) return false;
+  if (!token) return false;
 
   try {
-    const response = await fetch(\, {
-      headers: { 'Authorization': \ },
+    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+      headers: { 'Authorization': `Bearer ${token}` },
     });
 
     const data: VerifyResponse = await response.json();
 
-    if (\!data.valid) {
+    if (!data.valid) {
       // Token invalid - clear it
       logout();
       return false;
@@ -114,7 +114,7 @@ export function getStaffName(): string | null {
  * Check if user is authenticated (has token)
  */
 export function isAuthenticated(): boolean {
-  return \!\!getToken();
+  return !!getToken();
 }
 
 /**
@@ -131,7 +131,7 @@ export function logout(): void {
 export function getAuthHeaders(): Record<string, string> {
   const token = getToken();
   if (token) {
-    return { 'Authorization': \ };
+    return { 'Authorization': `Bearer ${token}` };
   }
   return {};
 }
