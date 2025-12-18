@@ -52,6 +52,29 @@ export const AppointmentDetailModal = ({
   const provider = PROVIDERS.find(p => p.id === appointment.provider);
   const providerName = provider?.fullName || appointment.provider;
 
+  // Determine booked by display text
+  const getBookedByDisplay = () => {
+    const bookedBy = appointment.booked_by?.toLowerCase();
+    
+    // Check if booked by AI
+    if (bookedBy === 'ai' || bookedBy === 'leilani' || bookedBy === 'retell') {
+      return (
+        <span className="flex items-center gap-1">
+          <span>AI Assistant</span>
+          <span>🤖</span>
+        </span>
+      );
+    }
+    
+    // Check if legacy 'staff' value
+    if (bookedBy === 'staff' || !appointment.booked_by) {
+      return 'Staff';
+    }
+    
+    // Return actual staff name
+    return appointment.booked_by;
+  };
+
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
@@ -129,14 +152,7 @@ export const AppointmentDetailModal = ({
             <div className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">Booked by:</span>
               <span className="font-medium">
-                {appointment.booked_by === 'ai' ? (
-                  <span className="flex items-center gap-1">
-                    <span>AI Assistant</span>
-                    <span>🤖</span>
-                  </span>
-                ) : (
-                  'Staff'
-                )}
+                {getBookedByDisplay()}
               </span>
             </div>
           </div>

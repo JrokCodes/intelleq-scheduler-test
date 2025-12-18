@@ -32,5 +32,18 @@ export const DAYS_OF_WEEK = [
 // Authentication
 export const API_BASE_URL = 'https://api.intelleqn8n.net';
 export const AUTH_TOKEN_KEY = 'quinio_auth_token';
+export const STAFF_NAME_KEY = 'quinio_staff_name';
 export const AUTH_STORAGE_KEY = AUTH_TOKEN_KEY; // Alias for backward compatibility
 export const AUTH_PRACTICE = 'quinio';
+
+// Quinio Staff Members
+export const QUINIO_STAFF = [
+  'Grayce',
+  'Cherie',
+  'Dr. Q',
+  'Nicole',
+  'Kristianne',
+  'Rixon',
+] as const;
+
+export type QuinioStaffMember = typeof QUINIO_STAFF[number];
