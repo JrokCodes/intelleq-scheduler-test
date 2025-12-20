@@ -20,6 +20,7 @@ const APPOINTMENT_TYPES = [
   'Procedure',
   'Same Day',
   'Shots Only',
+  'Video Visit',
   'Well Child Check',
 ];
 
@@ -33,6 +34,7 @@ const APPOINTMENT_TYPE_DURATIONS: Record<string, number> = {
   'Procedure': 30,
   'Same Day': 15,
   'Shots Only': 15,
+  'Video Visit': 15,
   'Well Child Check': 30,
 };
 
