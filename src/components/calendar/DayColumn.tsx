@@ -75,12 +75,13 @@ interface DayColumnProps {
   hoveredSlotIndex: number | null;
   onSlotHover: (index: number | null) => void;
   draggedAppointmentDuration?: number; // Duration in minutes of appointment being dragged
+  draggedAppointmentId?: string; // ID of appointment being dragged (to exclude from conflict check)
 }
 
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, bookingInProgress, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false, hoveredSlotIndex, onSlotHover, draggedAppointmentDuration }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, bookingInProgress, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false, hoveredSlotIndex, onSlotHover, draggedAppointmentDuration, draggedAppointmentId }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -357,7 +358,12 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                 }
 
                 // Check appointments by comparing hours/minutes in Hawaii time
+                // Exclude the appointment being dragged so its slots become droppable
                 const hasAppointment = providerAppointments.some(apt => {
+                  // Skip the appointment being dragged
+                  if (draggedAppointmentId && apt.id === draggedAppointmentId) {
+                    return false;
+                  }
                   const aptStartHST = toZonedTime(new Date(apt.start_time), HAWAII_TZ);
                   const aptEndHST = toZonedTime(new Date(apt.end_time), HAWAII_TZ);
                   const aptStartMinutes = aptStartHST.getHours() * 60 + aptStartHST.getMinutes();

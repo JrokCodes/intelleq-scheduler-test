@@ -188,6 +188,7 @@ export const CalendarGrid = ({
               hoveredSlotIndex={hoveredSlotIndex}
               onSlotHover={setHoveredSlotIndex}
               draggedAppointmentDuration={activeAppointment?.duration_minutes}
+              draggedAppointmentId={activeAppointment?.id}
             />
           ))}
         </div>
