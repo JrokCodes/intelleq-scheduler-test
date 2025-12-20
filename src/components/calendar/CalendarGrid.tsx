@@ -5,7 +5,7 @@ import { TimeColumn } from './TimeColumn';
 import { DayColumn } from './DayColumn';
 import { Appointment, EventBlock, Holiday, BookingInProgress } from '@/types/calendar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DndContext, DragOverlay, closestCenter, DragStartEvent, DragEndEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
+import { DndContext, DragOverlay, pointerWithin, DragStartEvent, DragEndEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { AppointmentCard } from './AppointmentCard';
 import { rescheduleAppointment } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
@@ -162,7 +162,7 @@ export const CalendarGrid = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
