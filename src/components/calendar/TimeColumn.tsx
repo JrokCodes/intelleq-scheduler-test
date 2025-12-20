@@ -1,7 +1,11 @@
 import { TIME_SLOTS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
-export const TimeColumn = () => {
+interface TimeColumnProps {
+  hoveredSlotIndex: number | null;
+}
+
+export const TimeColumn = ({ hoveredSlotIndex }: TimeColumnProps) => {
   return (
     <div className="flex flex-col border-r-2 border-slate-500 bg-card">
       {/* Header spacer to align with day headers */}
@@ -14,15 +18,19 @@ export const TimeColumn = () => {
         <div
           key={index}
           className={cn(
-            "h-12 flex items-start justify-end pr-3 pt-1",
+            "h-12 flex items-start justify-end pr-3 pt-1 transition-colors",
             slot.minute === 0
               ? "border-b-2 border-slate-400" // Hour marker - bold
-              : "border-b border-slate-600 dark:border-slate-500" // 15-min interval - subtle
+              : "border-b border-slate-600 dark:border-slate-500", // 15-min interval - subtle
+            // Row highlight when hovered
+            hoveredSlotIndex === index && "bg-white/[0.08]"
           )}
         >
           <span className={cn(
             "text-xs font-medium",
-            slot.minute === 0 ? "text-slate-300" : "text-time-text"
+            slot.minute === 0 ? "text-slate-300" : "text-time-text",
+            // Brighten text when row is hovered
+            hoveredSlotIndex === index && "text-slate-200"
           )}>{slot.time}</span>
         </div>
       ))}

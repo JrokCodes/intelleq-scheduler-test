@@ -19,12 +19,14 @@ interface DayColumnProps {
   onAppointmentClick?: (appointment: Appointment) => void;
   onEventBlockClick?: (eventBlock: EventBlock) => void;
   isToday?: boolean;
+  hoveredSlotIndex: number | null;
+  onSlotHover: (index: number | null) => void;
 }
 
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, bookingInProgress, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, bookingInProgress, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false, hoveredSlotIndex, onSlotHover }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -232,14 +234,20 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
         {/* Time slot grid cells */}
         <div className="flex flex-col">
           {TIME_SLOTS.map((slot, slotIndex) => (
-            <div key={slotIndex} className={cn(
-              "flex h-12",
-              !slot.isLunchTime && (
-                slot.minute === 0
-                  ? "border-b-2 border-slate-400" // Hour marker - bold
-                  : "border-b border-slate-600 dark:border-slate-500" // 15-min interval - subtle
-              )
-            )}>
+            <div
+              key={slotIndex}
+              onMouseEnter={() => onSlotHover(slotIndex)}
+              className={cn(
+                "flex h-12 transition-colors",
+                !slot.isLunchTime && (
+                  slot.minute === 0
+                    ? "border-b-2 border-slate-400" // Hour marker - bold
+                    : "border-b border-slate-600 dark:border-slate-500" // 15-min interval - subtle
+                ),
+                // Row highlight when hovered
+                hoveredSlotIndex === slotIndex && "bg-white/[0.08]"
+              )}
+            >
               {PROVIDERS.map((provider, providerIndex) => {
                 // Check if this slot has an appointment or event for click handling
                 const providerAppointments = dayAppointments.filter(apt => apt.provider === provider.id);

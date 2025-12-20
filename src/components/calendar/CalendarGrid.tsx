@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { addDays, format, isToday } from 'date-fns';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import { TimeColumn } from './TimeColumn';
@@ -28,6 +29,9 @@ export const CalendarGrid = ({
   onAppointmentClick,
   onEventBlockClick
 }: CalendarGridProps) => {
+  // Track which row is being hovered for cross-column highlight
+  const [hoveredSlotIndex, setHoveredSlotIndex] = useState<number | null>(null);
+
   // Only show weekdays (Monday-Friday = 5 days)
   const days = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
 
@@ -69,10 +73,10 @@ export const CalendarGrid = ({
   }
 
   return (
-    <div className="flex-1 overflow-auto animate-fade-in">
+    <div className="flex-1 overflow-auto animate-fade-in" onMouseLeave={() => setHoveredSlotIndex(null)}>
       <div className="flex w-full h-full">
         {/* Time column */}
-        <TimeColumn />
+        <TimeColumn hoveredSlotIndex={hoveredSlotIndex} />
 
         {/* Day columns - flex-1 to fill remaining space equally */}
         {days.map((day, index) => (
@@ -88,6 +92,8 @@ export const CalendarGrid = ({
             onAppointmentClick={onAppointmentClick}
             onEventBlockClick={onEventBlockClick}
             isToday={isToday(day)}
+            hoveredSlotIndex={hoveredSlotIndex}
+            onSlotHover={setHoveredSlotIndex}
           />
         ))}
       </div>
