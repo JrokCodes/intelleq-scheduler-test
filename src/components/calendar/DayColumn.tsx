@@ -20,9 +20,11 @@ interface DroppableSlotProps {
   children?: React.ReactNode;
   onClick: () => void;
   className?: string;
+  draggedDuration?: number; // Duration in minutes of the appointment being dragged
+  slotHeight: number;
 }
 
-const DroppableSlot = ({ id, date, time, provider, isDroppable, isLunchTime, onClick, className }: DroppableSlotProps) => {
+const DroppableSlot = ({ id, date, time, provider, isDroppable, isLunchTime, onClick, className, draggedDuration, slotHeight }: DroppableSlotProps) => {
   const { setNodeRef, isOver } = useDroppable({
     id,
     data: {
@@ -35,15 +37,27 @@ const DroppableSlot = ({ id, date, time, provider, isDroppable, isLunchTime, onC
     disabled: !isDroppable,
   });
 
+  // Calculate highlight height based on appointment duration
+  const slotsNeeded = draggedDuration ? Math.ceil(draggedDuration / 15) : 1;
+  const highlightHeight = slotsNeeded * slotHeight;
+
   return (
     <div
       ref={setNodeRef}
       onClick={onClick}
       className={cn(
         className,
-        isOver && isDroppable && "bg-primary/30 ring-2 ring-primary ring-inset"
+        "relative"
       )}
-    />
+    >
+      {/* Multi-slot drop highlight overlay */}
+      {isOver && isDroppable && (
+        <div
+          className="absolute left-0 right-0 top-0 bg-primary/30 ring-2 ring-primary ring-inset rounded-sm pointer-events-none z-30"
+          style={{ height: `${highlightHeight}px` }}
+        />
+      )}
+    </div>
   );
 };
 
@@ -60,12 +74,13 @@ interface DayColumnProps {
   isToday?: boolean;
   hoveredSlotIndex: number | null;
   onSlotHover: (index: number | null) => void;
+  draggedAppointmentDuration?: number; // Duration in minutes of appointment being dragged
 }
 
 const SLOT_HEIGHT = 48; // Height of each 15-minute slot in pixels
 const HAWAII_TZ = 'Pacific/Honolulu';
 
-export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, bookingInProgress, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false, hoveredSlotIndex, onSlotHover }: DayColumnProps) => {
+export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, bookingInProgress, onSlotClick, onAppointmentClick, onEventBlockClick, isToday = false, hoveredSlotIndex, onSlotHover, draggedAppointmentDuration }: DayColumnProps) => {
   const dateStr = format(date, 'M/d');
   
   // Check if this day is a holiday
@@ -389,6 +404,8 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                     isDroppable={isClickable}
                     isLunchTime={slot.isLunchTime}
                     onClick={handleSlotClick}
+                    draggedDuration={draggedAppointmentDuration}
+                    slotHeight={SLOT_HEIGHT}
                     className={cn(
                       "flex-1 last:border-r-0 transition-colors",
                       !slot.isLunchTime && "border-r border-slate-500 dark:border-slate-400",

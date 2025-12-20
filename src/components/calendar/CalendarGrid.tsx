@@ -5,7 +5,7 @@ import { TimeColumn } from './TimeColumn';
 import { DayColumn } from './DayColumn';
 import { Appointment, EventBlock, Holiday, BookingInProgress } from '@/types/calendar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DndContext, DragOverlay, closestCenter, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, closestCenter, DragStartEvent, DragEndEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { AppointmentCard } from './AppointmentCard';
 import { rescheduleAppointment } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
@@ -39,6 +39,17 @@ export const CalendarGrid = ({
   const [hoveredSlotIndex, setHoveredSlotIndex] = useState<number | null>(null);
   // Track active dragging appointment for DragOverlay
   const [activeAppointment, setActiveAppointment] = useState<Appointment | null>(null);
+
+  // Configure drag activation - requires 200ms hold or 8px movement to start drag
+  // This allows normal clicks to work for viewing appointment details
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    })
+  );
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -150,6 +161,7 @@ export const CalendarGrid = ({
 
   return (
     <DndContext
+      sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
@@ -175,6 +187,7 @@ export const CalendarGrid = ({
               isToday={isToday(day)}
               hoveredSlotIndex={hoveredSlotIndex}
               onSlotHover={setHoveredSlotIndex}
+              draggedAppointmentDuration={activeAppointment?.duration_minutes}
             />
           ))}
         </div>
