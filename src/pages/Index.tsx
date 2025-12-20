@@ -285,6 +285,7 @@ const Index = () => {
           onSlotClick={handleSlotClick}
           onAppointmentClick={handleAppointmentClick}
           onEventBlockClick={handleEventBlockClick}
+          onRescheduleSuccess={handleBookingSuccess}
         />
 
         <BookingModal

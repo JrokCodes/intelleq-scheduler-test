@@ -7,6 +7,45 @@ import { AppointmentCard } from './AppointmentCard';
 import { EventBlockCard } from './EventBlockCard';
 import { BookingInProgressCard } from './BookingInProgressCard';
 import { useMemo } from 'react';
+import { useDroppable } from '@dnd-kit/core';
+
+// Droppable slot wrapper component
+interface DroppableSlotProps {
+  id: string;
+  date: Date;
+  time: string;
+  provider: { id: string; name: string };
+  isDroppable: boolean;
+  isLunchTime: boolean;
+  children?: React.ReactNode;
+  onClick: () => void;
+  className?: string;
+}
+
+const DroppableSlot = ({ id, date, time, provider, isDroppable, isLunchTime, onClick, className }: DroppableSlotProps) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id,
+    data: {
+      type: 'slot',
+      date,
+      time,
+      provider: provider.id,
+      providerName: provider.name,
+    },
+    disabled: !isDroppable,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      onClick={onClick}
+      className={cn(
+        className,
+        isOver && isDroppable && "bg-primary/30 ring-2 ring-primary ring-inset"
+      )}
+    />
+  );
+};
 
 interface DayColumnProps {
   date: Date;
@@ -338,9 +377,17 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                   }
                 };
 
+                const slotId = `${format(date, 'yyyy-MM-dd')}-${slot.time}-${provider.id}`;
+
                 return (
-                  <div
+                  <DroppableSlot
                     key={provider.id}
+                    id={slotId}
+                    date={date}
+                    time={slot.time}
+                    provider={provider}
+                    isDroppable={isClickable}
+                    isLunchTime={slot.isLunchTime}
                     onClick={handleSlotClick}
                     className={cn(
                       "flex-1 last:border-r-0 transition-colors",
