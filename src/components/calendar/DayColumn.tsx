@@ -108,13 +108,10 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
           </div>
           {/* Provider sub-headers */}
           <div className="flex border-t border-slate-500 dark:border-slate-400">
-            {PROVIDERS.map((provider, index) => (
+            {PROVIDERS.map((provider) => (
               <div
                 key={provider.id}
-                className={cn(
-                  "flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0",
-                  index === 0 ? "bg-blue-500/[0.05]" : "bg-violet-500/[0.05]"
-                )}
+                className="flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0"
               >
                 <span className="text-xs text-muted-foreground">{provider.name}</span>
               </div>
@@ -148,13 +145,10 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
         </div>
         {/* Provider sub-headers */}
         <div className="flex border-t border-slate-500 dark:border-slate-400">
-          {PROVIDERS.map((provider, index) => (
+          {PROVIDERS.map((provider) => (
             <div
               key={provider.id}
-              className={cn(
-                "flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0",
-                index === 0 ? "bg-blue-500/[0.05]" : "bg-violet-500/[0.05]"
-              )}
+              className="flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0"
             >
               <span className="text-xs text-muted-foreground">{provider.name}</span>
             </div>
@@ -306,15 +300,11 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                     onClick={handleSlotClick}
                     className={cn(
                       "flex-1 last:border-r-0 transition-colors",
-                      // Provider background tint
-                      providerIndex === 0 ? "bg-blue-500/[0.05]" : "bg-violet-500/[0.05]",
-                      // Provider separator
                       !slot.isLunchTime && "border-r border-slate-500 dark:border-slate-400",
-                      // Slot behavior
                       slot.isLunchTime
                         ? "lunch-stripes cursor-not-allowed"
                         : isClickable
-                        ? (providerIndex === 0 ? "hover:bg-blue-400/30" : "hover:bg-violet-400/30") + " cursor-pointer"
+                        ? "hover:bg-hover-cell cursor-pointer"
                         : "cursor-default"
                     )}
                   />
