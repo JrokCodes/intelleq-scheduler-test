@@ -131,6 +131,42 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
     );
   }
 
+  // Block today's column with guidance message
+  if (isToday) {
+    return (
+      <div className={cn(
+        "flex-1 flex flex-col border-r-2 border-slate-500 last:border-r-0",
+        "bg-primary/15 border-l-2 border-l-primary"
+      )}>
+        {/* Day Header - just date, no provider sub-headers */}
+        <div className="h-16 border-b border-border bg-primary/10">
+          <div className="text-center py-2">
+            <div className="text-sm font-semibold text-foreground">{dayName}</div>
+            <div className="text-xs text-muted-foreground">{dateStr}</div>
+          </div>
+          {/* Blocked indicator instead of provider headers */}
+          <div className="flex items-center justify-center border-t border-slate-500 dark:border-slate-400 py-1">
+            <span className="text-xs text-primary font-medium">Today - Use Akamai</span>
+          </div>
+        </div>
+
+        {/* Today blocked overlay with guidance */}
+        <div className="flex-1 today-blocked-stripes cursor-not-allowed relative overflow-hidden">
+          {/* Sticky guidance card */}
+          <div className="sticky top-4 z-10 mx-3 mt-4">
+            <div className="bg-card/95 backdrop-blur-sm px-4 py-4 rounded-lg border border-primary/30 shadow-lg">
+              <div className="text-sm font-semibold text-primary mb-3 text-center">📋 Same-Day Booking</div>
+              <div className="space-y-3 text-xs text-muted-foreground">
+                <p>• If need to book for this day refer to Akamai</p>
+                <p>• If Rescheduling to today please delete the old appointment and then refer to Akamai for scheduling the new one</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn(
       "flex-1 flex flex-col border-r-2 border-slate-500 last:border-r-0",

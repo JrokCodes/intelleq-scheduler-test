@@ -113,6 +113,18 @@ All colors MUST be HSL.
         hsl(var(--muted-foreground) / 0.1) 20px
       );
   }
+
+  /* Today blocked - blue-grey diagonal stripes */
+  .today-blocked-stripes {
+    background:
+      repeating-linear-gradient(
+        45deg,
+        hsl(217 30% 15%),
+        hsl(217 30% 15%) 10px,
+        hsl(217 30% 20%) 10px,
+        hsl(217 30% 20%) 20px
+      );
+  }
 }
 
 /* Calendar dropdown styling for dark mode */
