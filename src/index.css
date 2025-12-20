@@ -53,6 +53,16 @@ All colors MUST be HSL.
     --time-text: 0 0% 45%;
     --lunch-bg: 0 0% 12%;
     --hover-cell: 0 0% 18%;
+
+    /* Provider column colors (for background tints) */
+    --provider-cherie: 217 91% 60%;
+    --provider-anna-lia: 270 70% 60%;
+
+    /* Day separator - bold line between days */
+    --day-separator: 0 0% 50%;
+
+    /* Hour marker - bold line at top of each hour */
+    --hour-marker: 0 0% 45%;
   }
 }
 

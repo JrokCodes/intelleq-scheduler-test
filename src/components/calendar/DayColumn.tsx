@@ -94,8 +94,8 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
   if (holiday) {
     return (
       <div className={cn(
-        "flex flex-col border-r border-border min-w-[160px]",
-        isToday && "bg-primary/5 border-l-2 border-l-primary"
+        "flex flex-col border-r-2 border-slate-500 min-w-[160px]",
+        isToday && "bg-primary/15 border-l-2 border-l-primary"
       )}>
         {/* Day Header */}
         <div className={cn(
@@ -108,10 +108,13 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
           </div>
           {/* Provider sub-headers */}
           <div className="flex border-t border-slate-500 dark:border-slate-400">
-            {PROVIDERS.map((provider) => (
+            {PROVIDERS.map((provider, index) => (
               <div
                 key={provider.id}
-                className="flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0"
+                className={cn(
+                  "flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0",
+                  index === 0 ? "bg-blue-500/[0.15]" : "bg-violet-500/[0.15]"
+                )}
               >
                 <span className="text-xs text-muted-foreground">{provider.name}</span>
               </div>
@@ -131,8 +134,8 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
 
   return (
     <div className={cn(
-      "flex-1 flex flex-col border-r border-border last:border-r-0",
-      isToday && "bg-primary/5 border-l-2 border-l-primary"
+      "flex-1 flex flex-col border-r-2 border-slate-500 last:border-r-0",
+      isToday && "bg-primary/15 border-l-2 border-l-primary"
     )}>
       {/* Day Header */}
       <div className={cn(
@@ -145,10 +148,13 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
         </div>
         {/* Provider sub-headers */}
         <div className="flex border-t border-slate-500 dark:border-slate-400">
-          {PROVIDERS.map((provider) => (
+          {PROVIDERS.map((provider, index) => (
             <div
               key={provider.id}
-              className="flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0"
+              className={cn(
+                "flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0",
+                index === 0 ? "bg-blue-500/[0.15]" : "bg-violet-500/[0.15]"
+              )}
             >
               <span className="text-xs text-muted-foreground">{provider.name}</span>
             </div>
@@ -232,8 +238,15 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
         {/* Time slot grid cells */}
         <div className="flex flex-col">
           {TIME_SLOTS.map((slot, slotIndex) => (
-            <div key={slotIndex} className={cn("flex h-12", !slot.isLunchTime && "border-b border-slate-500 dark:border-slate-400")}>
-              {PROVIDERS.map((provider) => {
+            <div key={slotIndex} className={cn(
+              "flex h-12",
+              !slot.isLunchTime && (
+                slot.minute === 0
+                  ? "border-b-2 border-slate-400" // Hour marker - bold
+                  : "border-b border-slate-600 dark:border-slate-500" // 15-min interval - subtle
+              )
+            )}>
+              {PROVIDERS.map((provider, providerIndex) => {
                 // Check if this slot has an appointment or event for click handling
                 const providerAppointments = dayAppointments.filter(apt => apt.provider === provider.id);
                 const providerEvents = dayEventBlocks.filter(event => event.provider === provider.id);
@@ -293,11 +306,15 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                     onClick={handleSlotClick}
                     className={cn(
                       "flex-1 last:border-r-0 transition-colors",
+                      // Provider background tint
+                      providerIndex === 0 ? "bg-blue-500/[0.15]" : "bg-violet-500/[0.15]",
+                      // Provider separator
                       !slot.isLunchTime && "border-r border-slate-500 dark:border-slate-400",
+                      // Slot behavior
                       slot.isLunchTime
                         ? "lunch-stripes cursor-not-allowed"
                         : isClickable
-                        ? "hover:bg-hover-cell cursor-pointer"
+                        ? (providerIndex === 0 ? "hover:bg-blue-400/30" : "hover:bg-violet-400/30") + " cursor-pointer"
                         : "cursor-default"
                     )}
                   />

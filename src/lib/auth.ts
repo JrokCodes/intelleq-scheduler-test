@@ -47,7 +47,7 @@ export async function login(password: string, staffName?: string): Promise<Login
     if (data.success && data.token) {
       // Store token
       localStorage.setItem(AUTH_TOKEN_KEY, data.token);
-      
+
       // Store staff name for display purposes
       if (data.staff_name) {
         localStorage.setItem(STAFF_NAME_KEY, data.staff_name);
