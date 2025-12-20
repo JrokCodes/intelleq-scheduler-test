@@ -113,7 +113,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                 key={provider.id}
                 className={cn(
                   "flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0",
-                  index === 0 ? "bg-blue-500/[0.15]" : "bg-violet-500/[0.15]"
+                  index === 0 ? "bg-blue-500/[0.05]" : "bg-violet-500/[0.05]"
                 )}
               >
                 <span className="text-xs text-muted-foreground">{provider.name}</span>
@@ -153,7 +153,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
               key={provider.id}
               className={cn(
                 "flex-1 text-center py-1 border-r border-slate-500 dark:border-slate-400 last:border-r-0",
-                index === 0 ? "bg-blue-500/[0.15]" : "bg-violet-500/[0.15]"
+                index === 0 ? "bg-blue-500/[0.05]" : "bg-violet-500/[0.05]"
               )}
             >
               <span className="text-xs text-muted-foreground">{provider.name}</span>
@@ -307,7 +307,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
                     className={cn(
                       "flex-1 last:border-r-0 transition-colors",
                       // Provider background tint
-                      providerIndex === 0 ? "bg-blue-500/[0.15]" : "bg-violet-500/[0.15]",
+                      providerIndex === 0 ? "bg-blue-500/[0.05]" : "bg-violet-500/[0.05]",
                       // Provider separator
                       !slot.isLunchTime && "border-r border-slate-500 dark:border-slate-400",
                       // Slot behavior
