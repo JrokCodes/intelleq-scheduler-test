@@ -96,7 +96,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
   if (holiday) {
     return (
       <div className={cn(
-        "flex flex-col border-r-2 border-slate-500 min-w-[160px]",
+        "flex flex-col border-r-[3px] border-slate-300 min-w-[160px]",
         isToday && "bg-primary/15 border-l-2 border-l-primary"
       )}>
         {/* Day Header */}
@@ -135,7 +135,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
   if (isToday) {
     return (
       <div className={cn(
-        "flex-1 flex flex-col border-r-2 border-slate-500 last:border-r-0",
+        "flex-1 flex flex-col border-r-[3px] border-slate-300 last:border-r-0",
         "bg-primary/15 border-l-2 border-l-primary"
       )}>
         {/* Day Header - just date, no provider sub-headers */}
@@ -169,7 +169,7 @@ export const DayColumn = ({ date, dayName, appointments, eventBlocks, holidays, 
 
   return (
     <div className={cn(
-      "flex-1 flex flex-col border-r-2 border-slate-500 last:border-r-0",
+      "flex-1 flex flex-col border-r-[3px] border-slate-300 last:border-r-0",
       isToday && "bg-primary/15 border-l-2 border-l-primary"
     )}>
       {/* Day Header */}

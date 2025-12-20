@@ -7,7 +7,7 @@ interface TimeColumnProps {
 
 export const TimeColumn = ({ hoveredSlotIndex }: TimeColumnProps) => {
   return (
-    <div className="flex flex-col border-r-2 border-slate-500 bg-card">
+    <div className="flex flex-col border-r-[3px] border-slate-300 bg-card">
       {/* Header spacer to align with day headers */}
       <div className="h-16 border-b border-border flex items-center justify-center px-4">
         <span className="text-xs font-medium text-muted-foreground">Time</span>
