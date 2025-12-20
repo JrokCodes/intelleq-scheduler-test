@@ -32,7 +32,7 @@ export const PatientSearch = ({
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    if (searchQuery.length < 2) {
+    if (searchQuery.length < 1) {
       setPatients([]);
       setShowDropdown(false);
       return;
