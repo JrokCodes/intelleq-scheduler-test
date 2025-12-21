@@ -109,19 +109,22 @@ export async function deleteAppointment(appointmentId: string): Promise<any> {
 export async function rescheduleAppointment(
   appointmentId: string,
   newStartTime: string,
-  newProvider?: string
-): Promise<{ success: boolean; appointment?: any; error?: string }> {
+  durationMinutes?: number
+): Promise<any> {
+  const body: Record<string, unknown> = { start_time: newStartTime };
+  if (durationMinutes) body.duration_minutes = durationMinutes;
+
   const response = await fetch(`${API_BASE_URL}/quinio/appointments/${appointmentId}`, {
     method: 'PATCH',
     headers: getHeaders(true),
-    body: JSON.stringify({
-      new_start_time: newStartTime,
-      new_provider: newProvider,
-    }),
+    body: JSON.stringify(body),
   });
 
   const data = await handleResponse(response);
-  return data;
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to reschedule appointment');
+  }
+  return data.appointment;
 }
 
 export async function createAppointment(appointmentData: {
