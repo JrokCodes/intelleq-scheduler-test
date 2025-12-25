@@ -1,8 +1,9 @@
 /**
- * API functions for Quinio Staff Calendar
+ * API functions for Quinio Staff Calendar - TEST ENVIRONMENT
  *
  * Uses Python backend with JWT authentication
  * Backend URL: https://api.intelleqn8n.net
+ * Endpoints: /quinio-test/* (uses test tables)
  */
 
 import { API_BASE_URL } from './constants';
@@ -48,7 +49,7 @@ export async function fetchAppointments(startDate: string, endDate: string) {
     end_date: endDate,
   });
 
-  const response = await fetch(`${API_BASE_URL}/quinio/appointments?${params}`, {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/appointments?${params}`, {
     headers: getHeaders(),
   });
 
@@ -58,7 +59,7 @@ export async function fetchAppointments(startDate: string, endDate: string) {
 export async function searchPatients(query: string): Promise<any[]> {
   const params = new URLSearchParams({ query });
 
-  const response = await fetch(`${API_BASE_URL}/quinio/patients?${params}`, {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/patients?${params}`, {
     headers: getHeaders(),
   });
 
@@ -82,7 +83,7 @@ export async function addPatient(patientData: {
   secondary_insurance?: string;
   secondary_subscriber_id?: string;
 }): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/quinio/patients`, {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/patients`, {
     method: 'POST',
     headers: getHeaders(true),
     body: JSON.stringify(patientData),
@@ -98,7 +99,7 @@ export async function addPatient(patientData: {
 }
 
 export async function deleteAppointment(appointmentId: string): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/quinio/appointments/${appointmentId}`, {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/appointments/${appointmentId}`, {
     method: 'DELETE',
     headers: getHeaders(),
   });
@@ -114,7 +115,7 @@ export async function rescheduleAppointment(
   const body: Record<string, unknown> = { start_time: newStartTime };
   if (newProvider) body.provider = newProvider;
 
-  const response = await fetch(`${API_BASE_URL}/quinio/appointments/${appointmentId}`, {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/appointments/${appointmentId}`, {
     method: 'PATCH',
     headers: getHeaders(true),
     body: JSON.stringify(body),
@@ -138,7 +139,7 @@ export async function createAppointment(appointmentData: {
   appointment_type: string;
   reason: string;
 }): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/quinio/appointments`, {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/appointments`, {
     method: 'POST',
     headers: getHeaders(true),
     body: JSON.stringify(appointmentData),
@@ -160,7 +161,7 @@ export async function createEventBlock(eventBlockData: {
   end_time: string;
   notes?: string;
 }): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/quinio/event-blocks`, {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/event-blocks`, {
     method: 'POST',
     headers: getHeaders(true),
     body: JSON.stringify(eventBlockData),
@@ -176,7 +177,7 @@ export async function createEventBlock(eventBlockData: {
 }
 
 export async function deleteEventBlock(eventBlockId: string): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/quinio/event-blocks/${eventBlockId}`, {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/event-blocks/${eventBlockId}`, {
     method: 'DELETE',
     headers: getHeaders(),
   });

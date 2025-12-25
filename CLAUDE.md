@@ -1,54 +1,67 @@
-# Quinio Family Medicine Staff Calendar
+# Quinio Family Medicine Staff Calendar - TEST ENVIRONMENT
 
-> **Project-specific instructions for Claude Code**
+> **Test environment for Quinio Staff Calendar - uses test database tables**
 
 ---
 
 ## Project Overview
 
-**App Name**: IntelleQ Scheduler (Quinio Staff Calendar)
-**Purpose**: React calendar for Quinio Family Medicine staff scheduling
-**Platform**: Lovable.dev web application with two-way GitHub sync
-**Lovable Project**: Connected via GitHub sync
-**Git Remote**: https://github.com/JrokCodes/intelleq-scheduler.git
+**App Name**: IntelleQ Scheduler Test
+**Purpose**: TEST environment for Quinio Family Medicine staff scheduling
+**Platform**: Lovable.dev web application deployed to Vercel
+**Git Remote**: https://github.com/JrokCodes/intelleq-scheduler-test.git
+
+---
+
+## This is a TEST Environment
+
+**IMPORTANT**: This app uses TEST database tables:
+- `appointments_test` (not `appointments`)
+- `patients_test` (not `patients`)
+- `event_blocks_test` (not `event_blocks`)
+- `booking_in_progress_test` (not `booking_in_progress`)
+
+Changes made here do NOT affect production data.
 
 ---
 
 ## Development Workflow
 
 ### How Changes Propagate
-1. **Edit files** in this repo (`C:\Users\jrok1\intelleq-scheduler-temp`)
-2. **Commit & push** to GitHub (`intelleq-scheduler`)
-3. **Lovable.dev** auto-syncs changes (two-way sync enabled)
-4. **Vercel** auto-deploys from GitHub
+1. **Edit files** in this repo (`C:\Users\jrok1\intelleq-scheduler-test`)
+2. **Commit & push** to GitHub (`intelleq-scheduler-test`)
+3. **Vercel** auto-deploys from GitHub
 
 ### Key Paths
-- **This repo**: `C:\Users\jrok1\intelleq-scheduler-temp`
-- **Python backend**: `C:\Users\jrok1\intelleq-library-temp\backend`
+- **Test repo**: `C:\Users\jrok1\intelleq-scheduler-test`
+- **Production repo**: `C:\Users\jrok1\intelleq-scheduler-temp`
+- **Python backend**: `/home/ubuntu/intelleq-backend/backend/app/routes/calendar_site_flows/quinio_test.py`
 - **EC2 server**: `3.142.245.101` (ubuntu@)
 
 ---
 
-## Architecture (Secure - Implemented Dec 2025)
+## Architecture
 
 ```
 ┌─────────────────┐      JWT Token        ┌─────────────────┐
-│   Lovable App   │ ◄──────────────────► │  Python Backend │
-│   (Vercel)      │                       │  (EC2)          │
+│  TEST Frontend  │ ◄──────────────────► │  Python Backend │
+│  (Vercel)       │                       │  (EC2)          │
 └─────────────────┘                       └────────┬────────┘
                                                    │
+                   /quinio-test/* endpoints        │
                                                    ▼
                                           ┌───────────────┐
                                           │  PostgreSQL   │
                                           │  (AWS RDS)    │
+                                          │  *_test tables│
                                           └───────────────┘
 ```
 
 ### Authentication Flow
 1. User enters password on login page
-2. Frontend POSTs to `/auth/login` with `{practice: "quinio", password: "..."}`
+2. Frontend POSTs to `/auth/login` with `{practice: "quinio_test", password: "..."}`
 3. Backend verifies password hash, returns JWT token
-4. Token stored in localStorage (`quinio_auth_token`)
+4. Token stored in localStorage (`quinio_test_auth_token`)
 5. All API calls include `Authorization: Bearer <token>` header
 6. Token expires after 24 hours
 
@@ -60,30 +73,24 @@
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
-| `/auth/login` | POST | Login → returns JWT |
+| `/auth/login` | POST | Login → returns JWT (practice: "quinio_test") |
 | `/auth/verify` | GET | Verify token validity |
-| `/quinio/appointments` | GET | Get appointments for date range |
-| `/quinio/appointments` | POST | Create appointment (with conflict check) |
-| `/quinio/appointments/{id}` | DELETE | Delete appointment |
-| `/quinio/patients` | GET | Search patients |
-| `/quinio/patients` | POST | Add patient (with duplicate check) |
-| `/quinio/event-blocks` | POST | Create event block |
-| `/quinio/event-blocks/{id}` | DELETE | Delete event block |
-
-### Backend Features
-- **Conflict detection**: Prevents double-booking appointments
-- **Duplicate patient check**: Returns existing patient if name+DOB match
-- **Google Sheets logging**: All actions logged with "Staff (Lovable)" source
-- **JWT authentication**: 24-hour token expiration
+| `/quinio-test/appointments` | GET | Get appointments (from test table) |
+| `/quinio-test/appointments` | POST | Create appointment (in test table) |
+| `/quinio-test/appointments/{id}` | DELETE | Delete appointment |
+| `/quinio-test/patients` | GET | Search patients (from test table) |
+| `/quinio-test/patients` | POST | Add patient (to test table) |
+| `/quinio-test/event-blocks` | POST | Create event block (in test table) |
+| `/quinio-test/event-blocks/{id}` | DELETE | Delete event block |
 
 ---
 
 ## Quick Reference
 
 ### Authentication
-- **Password**: `quinio2025!`
-- **Token Key**: `quinio_auth_token` (localStorage)
-- **Practice ID**: `quinio`
+- **Password**: `quinio2025!` (same as production)
+- **Token Key**: `quinio_test_auth_token` (localStorage)
+- **Practice ID**: `quinio_test`
 
 ### Providers
 | ID | Name | Full Name |
@@ -98,66 +105,28 @@
 
 ---
 
-## File Structure
+## Fix Workflow
 
-```
-intelleq-scheduler/
-├── CLAUDE.md                    # This file
-├── src/
-│   ├── App.tsx                  # Main app with routing
-│   ├── lib/
-│   │   ├── api.ts               # API functions (Python backend)
-│   │   ├── auth.ts              # JWT authentication
-│   │   ├── constants.ts         # Config
-│   │   └── utils.ts             # Utilities
-│   ├── components/
-│   │   ├── auth/                # Login components
-│   │   ├── calendar/            # Calendar grid components
-│   │   ├── booking/             # Appointment booking
-│   │   ├── eventblock/          # Event block components
-│   │   └── ui/                  # shadcn/ui components
-│   ├── pages/
-│   │   └── Index.tsx            # Main calendar page
-│   └── types/
-│       └── calendar.ts
-└── package.json
-```
+### Testing a Fix:
+1. Make changes in this test repo
+2. Push to GitHub → Vercel auto-deploys
+3. Test on test frontend
+4. If fix works, apply same changes to production repo
+
+### Applying to Production:
+1. Copy changes to `C:\Users\jrok1\intelleq-scheduler-temp`
+2. Push to GitHub
+3. Lovable.dev syncs and Vercel deploys
 
 ---
 
-## Integration Points
+## Related Repos
 
-### PostgreSQL (AWS RDS)
-- **Host**: `quinio-patient-db.c34gcwe4cjgc.us-east-2.rds.amazonaws.com`
-- **Database**: `quinio_patient_db`
-- **Tables**: patients, appointments, event_blocks, holidays, booking_in_progress
-
-### Python Backend
-- **URL**: `https://api.intelleqn8n.net`
-- **Code**: `C:\Users\jrok1\intelleq-library-temp\backend`
-- **EC2 Path**: `/home/ubuntu/intelleq-backend/backend`
-
-### Google Sheets Logging
-- **Spreadsheet**: Real Time Logs (Quinio)
-- **Source Label**: "Staff (Lovable)" for calendar actions
-- **Logs**: schedule, cancel, event_block, delete_block
+| Environment | Path | GitHub |
+|-------------|------|--------|
+| **Test** | `C:\Users\jrok1\intelleq-scheduler-test` | JrokCodes/intelleq-scheduler-test |
+| **Production** | `C:\Users\jrok1\intelleq-scheduler-temp` | JrokCodes/intelleq-scheduler |
 
 ---
 
-## Instructions for Claude
-
-When working on this project:
-
-1. **Security** - No credentials in client-side code (JWT auth is implemented)
-2. **Hawaii timezone (UTC-10)** - All timestamps include offset
-3. **Follow Lovable patterns** - Use shadcn/ui, React, TypeScript
-4. **Test locally** - Run `npm run dev` before pushing
-5. **Commit carefully** - Changes auto-deploy via Lovable sync
-
----
-
-## Related Projects
-
-- **Tsai Calendar**: `C:\Users\jrok1\tsai-staff-scheduler-temp`
-- **Python Backend**: `C:\Users\jrok1\intelleq-library-temp\backend`
-- **IntelleQ Library**: `C:\Users\jrok1\intelleq-library-temp`
+*Last updated: 2025-12-24*
