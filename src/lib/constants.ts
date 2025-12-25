@@ -47,3 +47,42 @@ export const QUINIO_STAFF = [
 ] as const;
 
 export type QuinioStaffMember = typeof QUINIO_STAFF[number];
+
+// Appointment Types
+export const APPOINTMENT_TYPES = [
+  'Complete Physical Exam',
+  'Follow-up',
+  'Medicare Wellness Visit',
+  'New Patient',
+  'Office Visit',
+  'Procedure',
+  'Same Day',
+  'Shots Only',
+  'Video Visit',
+  'Well Child Check',
+] as const;
+
+// Default durations for each appointment type (in minutes)
+export const APPOINTMENT_TYPE_DURATIONS: Record<string, number> = {
+  'Complete Physical Exam': 30,
+  'Follow-up': 15,
+  'Medicare Wellness Visit': 30,
+  'New Patient': 30,
+  'Office Visit': 15,
+  'Procedure': 30,
+  'Same Day': 15,
+  'Shots Only': 15,
+  'Video Visit': 15,
+  'Well Child Check': 30,
+};
+
+// Duration options for appointment booking
+export const DURATIONS = [
+  { label: '15 minutes', value: 15 },
+  { label: '30 minutes', value: 30 },
+  { label: '45 minutes', value: 45 },
+  { label: '60 minutes', value: 60 },
+] as const;
+
+// Hawaii timezone constant
+export const HAWAII_TZ = 'Pacific/Honolulu';

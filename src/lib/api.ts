@@ -128,6 +128,33 @@ export async function rescheduleAppointment(
   return data;
 }
 
+export async function updateAppointment(
+  appointmentId: string,
+  updates: {
+    patient_id?: number;
+    patient_name?: string;
+    patient_dob?: string;
+    patient_phone?: string;
+    start_time?: string;
+    duration_minutes?: number;
+    appointment_type?: string;
+    reason?: string;
+    provider?: string;
+  }
+): Promise<any> {
+  const response = await fetch(`${API_BASE_URL}/quinio-test/appointments/${appointmentId}`, {
+    method: 'PUT',
+    headers: getHeaders(true),
+    body: JSON.stringify(updates),
+  });
+
+  const data = await handleResponse(response);
+  if (!data.success) {
+    throw new Error(data.error || 'Failed to update appointment');
+  }
+  return data;
+}
+
 export async function createAppointment(appointmentData: {
   provider: string;
   patient_id: number;

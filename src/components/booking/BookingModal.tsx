@@ -9,43 +9,7 @@ import { AddPatientModal } from './AddPatientModal';
 import { createAppointment } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
-
-const APPOINTMENT_TYPES = [
-  'Complete Physical Exam',
-  'Follow-up',
-  'Medicare Wellness Visit',
-  'New Patient',
-  'Office Visit',
-  'Procedure',
-  'Same Day',
-  'Shots Only',
-  'Video Visit',
-  'Well Child Check',
-];
-
-// Default durations for each appointment type (in minutes)
-const APPOINTMENT_TYPE_DURATIONS: Record<string, number> = {
-  'Complete Physical Exam': 30,
-  'Follow-up': 15,
-  'Medicare Wellness Visit': 30,
-  'New Patient': 30,
-  'Office Visit': 15,
-  'Procedure': 30,
-  'Same Day': 15,
-  'Shots Only': 15,
-  'Video Visit': 15,
-  'Well Child Check': 30,
-};
-
-const DURATIONS = [
-  { label: '15 minutes', value: 15 },
-  { label: '30 minutes', value: 30 },
-  { label: '45 minutes', value: 45 },
-  { label: '60 minutes', value: 60 },
-];
-
-const HAWAII_TZ = 'Pacific/Honolulu';
+import { APPOINTMENT_TYPES, APPOINTMENT_TYPE_DURATIONS, DURATIONS } from '@/lib/constants';
 
 interface BookingModalProps {
   open: boolean;

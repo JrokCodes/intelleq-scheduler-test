@@ -299,7 +299,9 @@ const Index = () => {
           open={detailModalOpen}
           onClose={() => setDetailModalOpen(false)}
           appointment={selectedAppointment}
+          appointments={appointments}
           onDeleteSuccess={handleDeleteSuccess}
+          onUpdateSuccess={handleBookingSuccess}
         />
 
         <EventBlockModal
