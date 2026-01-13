@@ -29,7 +29,9 @@ import { toast } from '@/hooks/use-toast';
 import { PROVIDERS, APPOINTMENT_TYPES, APPOINTMENT_TYPE_DURATIONS, DURATIONS, HAWAII_TZ } from '@/lib/constants';
 import { PatientSearch } from '@/components/booking/PatientSearch';
 import { AddPatientModal } from '@/components/booking/AddPatientModal';
-import { Pencil, AlertCircle } from 'lucide-react';
+import { Pencil, AlertCircle, DollarSign, ShieldCheck, FileText } from 'lucide-react';
+import { BillingStatusDot, ClaimStatusBadge, EligibilityModal, ClaimModal } from '@/components/billing';
+import { APPOINTMENT_TYPE_CPT_CODES } from '@/lib/constants';
 
 interface Patient {
   patient_id: number;
@@ -64,6 +66,10 @@ export const AppointmentDetailModal = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showAddPatient, setShowAddPatient] = useState(false);
+
+  // Billing state
+  const [showEligibilityModal, setShowEligibilityModal] = useState(false);
+  const [showClaimModal, setShowClaimModal] = useState(false);
 
   // Form state
   const [editedPatient, setEditedPatient] = useState<Patient | null>(null);
@@ -439,6 +445,55 @@ export const AppointmentDetailModal = ({
                   <span className="text-muted-foreground">Booked by:</span>
                   <span className="font-medium">{getBookedByDisplay()}</span>
                 </div>
+
+                {/* Billing Section */}
+                <div className="border-t border-border pt-4 mt-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Billing
+                    </h4>
+                    <BillingStatusDot status={null} />
+                  </div>
+
+                  {/* Quick billing info */}
+                  <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Default CPT:</span>
+                      <span className="font-mono font-medium">
+                        {APPOINTMENT_TYPE_CPT_CODES[appointment.appointment_type]?.code || '-'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Default Charge:</span>
+                      <span className="font-medium">
+                        ${APPOINTMENT_TYPE_CPT_CODES[appointment.appointment_type]?.fee?.toFixed(2) || '0.00'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Billing Actions */}
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setShowEligibilityModal(true)}
+                    >
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      Verify Insurance
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setShowClaimModal(true)}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Create Claim
+                    </Button>
+                  </div>
+                </div>
               </div>
 
               {/* Actions */}
@@ -610,6 +665,49 @@ export const AppointmentDetailModal = ({
         onClose={() => setShowAddPatient(false)}
         onPatientAdded={handlePatientAdded}
       />
+
+      {/* Eligibility Check Modal */}
+      {appointment && (
+        <EligibilityModal
+          open={showEligibilityModal}
+          onClose={() => setShowEligibilityModal(false)}
+          patient={{
+            patient_id: String(editedPatient?.patient_id || 0),
+            first_name: editedPatient?.first_name || appointment.patient_name.split(', ')[1] || '',
+            last_name: editedPatient?.last_name || appointment.patient_name.split(', ')[0] || '',
+            date_of_birth: appointment.patient_dob,
+          }}
+          onCreateClaim={() => {
+            setShowEligibilityModal(false);
+            setShowClaimModal(true);
+          }}
+        />
+      )}
+
+      {/* Claim Creation Modal */}
+      {appointment && (
+        <ClaimModal
+          open={showClaimModal}
+          onClose={() => setShowClaimModal(false)}
+          appointment={{
+            id: appointment.id,
+            patient_id: String(editedPatient?.patient_id || 0),
+            patient_name: appointment.patient_name,
+            patient_dob: appointment.patient_dob,
+            provider: appointment.provider,
+            provider_name: providerName,
+            start_time: appointment.start_time,
+            appointment_type: appointment.appointment_type,
+            duration_minutes: appointment.duration_minutes,
+          }}
+          onClaimCreated={() => {
+            toast({
+              title: 'Claim Created',
+              description: 'Claim has been created and saved as draft.',
+            });
+          }}
+        />
+      )}
     </>
   );
 };

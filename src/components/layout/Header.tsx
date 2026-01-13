@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, HelpCircle, FileText } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, LogOut, RefreshCw, HelpCircle, FileText, DollarSign } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { AUTH_STORAGE_KEY } from '@/lib/constants';
 import { cn } from '@/lib/utils';
@@ -82,6 +82,10 @@ export const Header = ({
           <Button variant="outline" size="sm" onClick={onRefresh} disabled={isRefreshing} className="border-border hover:bg-accent">
             <RefreshCw className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")} />
             Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/billing')} className="border-border hover:bg-accent" title="Billing Dashboard">
+            <DollarSign className="h-4 w-4 mr-2" />
+            Billing
           </Button>
           <Button variant="outline" size="icon" onClick={() => navigate('/docs')} className="h-9 w-9 border-border hover:bg-accent" title="Documentation">
             <FileText className="h-4 w-4" />
