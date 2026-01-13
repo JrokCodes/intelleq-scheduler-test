@@ -399,20 +399,70 @@ export interface PracticeInfo {
 // BILLING DASHBOARD
 // ============================================
 
+export interface RevenueTrendData {
+  month: string;
+  charges: number;
+  collections: number;
+}
+
+export interface ARAgingData {
+  current: number;        // 0-30 days
+  days_31_60: number;
+  days_61_90: number;
+  days_90_plus: number;
+}
+
+export interface PayerMixData {
+  payer_name: string;
+  payer_id?: string;
+  amount: number;
+  percentage: number;
+  color?: string;
+}
+
+export interface ActionItemsData {
+  claims_attention: number;     // Claims stuck or with errors
+  denials_to_work: number;      // Denials needing action
+  eligibility_failures: number; // Failed eligibility checks
+  payments_to_post: number;     // Unposted payments
+}
+
 export interface BillingStats {
+  // Claim counts
   total_claims: number;
   claims_draft: number;
   claims_ready: number;
   claims_submitted: number;
+  claims_accepted: number;
+  claims_rejected: number;
   claims_paid: number;
   claims_denied: number;
+  claims_appealed: number;
 
+  // Dollar amounts
   total_charges: number;
   total_paid: number;
   total_outstanding: number;
 
+  // Performance metrics
   first_pass_rate: number;                // Percentage
   avg_days_to_payment: number;
+  ar_days: number;                        // Average days in AR
+
+  // Trend data (vs previous period)
+  charges_trend_percent: number;
+  collections_trend_percent: number;
+  outstanding_trend_percent: number;
+  ar_days_trend: number;
+  first_pass_trend: number;
+
+  // Chart data
+  revenue_trend: RevenueTrendData[];      // 6 months of data
+  ar_aging: ARAgingData;
+  payer_mix: PayerMixData[];
+
+  // Work queue
+  action_items: ActionItemsData;
 }
 
 export interface ClaimsFilter {

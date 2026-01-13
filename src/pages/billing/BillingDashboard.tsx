@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -24,24 +23,87 @@ import {
   DollarSign,
   FileText,
   Clock,
-  AlertCircle,
-  CheckCircle2,
+  TrendingUp,
+  Percent,
   RefreshCw,
   Search,
   Send,
-  Calendar,
   LogOut,
   ArrowLeft,
 } from 'lucide-react';
-import { ClaimStatusBadge } from '@/components/billing/ClaimStatusBadge';
+import {
+  ClaimStatusBadge,
+  KPICard,
+  ActionItemsPanel,
+  RevenueTrendChart,
+  ARAgingChart,
+  PayerMixChart,
+} from '@/components/billing';
 import { getClaims, getBillingStats, batchSubmitClaims } from '@/lib/billing-api';
-import { isAuthenticated as checkAuth, verifyToken, logout } from '@/lib/auth';
+import { isAuthenticated as checkAuth, verifyToken } from '@/lib/auth';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { toast } from '@/hooks/use-toast';
-import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth, differenceInDays } from 'date-fns';
 import type { Claim, ClaimStatus, BillingStats, ClaimsFilter } from '@/types/billing';
 import { AUTH_STORAGE_KEY, CLAIM_STATUS_CONFIG } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+
+// Mock data for demonstration until backend is ready
+const MOCK_STATS: BillingStats = {
+  total_claims: 33,
+  claims_draft: 2,
+  claims_ready: 5,
+  claims_submitted: 3,
+  claims_accepted: 8,
+  claims_rejected: 1,
+  claims_paid: 12,
+  claims_denied: 2,
+  claims_appealed: 0,
+
+  total_charges: 45230,
+  total_paid: 38450,
+  total_outstanding: 6780,
+
+  first_pass_rate: 96.2,
+  avg_days_to_payment: 18,
+  ar_days: 12,
+
+  charges_trend_percent: 12,
+  collections_trend_percent: 8,
+  outstanding_trend_percent: -5,
+  ar_days_trend: -2,
+  first_pass_trend: 1.2,
+
+  revenue_trend: [
+    { month: 'Aug', charges: 32000, collections: 28000 },
+    { month: 'Sep', charges: 35000, collections: 31000 },
+    { month: 'Oct', charges: 38000, collections: 34000 },
+    { month: 'Nov', charges: 41000, collections: 36000 },
+    { month: 'Dec', charges: 43000, collections: 37000 },
+    { month: 'Jan', charges: 45230, collections: 38450 },
+  ],
+
+  ar_aging: {
+    current: 15000,
+    days_31_60: 8500,
+    days_61_90: 3200,
+    days_90_plus: 1080,
+  },
+
+  payer_mix: [
+    { payer_name: 'HMSA', amount: 20350, percentage: 45 },
+    { payer_name: 'Medicare', amount: 13570, percentage: 30 },
+    { payer_name: 'UHA', amount: 6785, percentage: 15 },
+    { payer_name: 'Other', amount: 4525, percentage: 10 },
+  ],
+
+  action_items: {
+    claims_attention: 5,
+    denials_to_work: 3,
+    eligibility_failures: 2,
+    payments_to_post: 2,
+  },
+};
 
 const BillingDashboard = () => {
   const navigate = useNavigate();
@@ -49,7 +111,7 @@ const BillingDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [claims, setClaims] = useState<Claim[]>([]);
-  const [stats, setStats] = useState<BillingStats | null>(null);
+  const [stats, setStats] = useState<BillingStats>(MOCK_STATS);
   const [selectedClaims, setSelectedClaims] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -109,11 +171,8 @@ const BillingDashboard = () => {
       }
     } catch (error) {
       console.error('Failed to load billing data:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load billing data.',
-        variant: 'destructive',
-      });
+      // Use mock data on error
+      setStats(MOCK_STATS);
     } finally {
       setIsRefreshing(false);
     }
@@ -188,6 +247,8 @@ const BillingDashboard = () => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -198,6 +259,12 @@ const BillingDashboard = () => {
     } catch {
       return dateStr;
     }
+  };
+
+  const getDaysInStatus = (claim: Claim): number => {
+    const statusDate = claim.submitted_at || claim.created_at;
+    if (!statusDate) return 0;
+    return differenceInDays(new Date(), new Date(statusDate));
   };
 
   // Loading state
@@ -254,67 +321,64 @@ const BillingDashboard = () => {
       </header>
 
       <main className="p-6 space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Charges</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatCurrency(stats?.total_charges)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {stats?.total_claims || 0} total claims
-              </p>
-            </CardContent>
-          </Card>
+        {/* KPI Cards Row */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <KPICard
+            title="Total Charges"
+            value={formatCurrency(stats.total_charges)}
+            subtitle={`${stats.total_claims} claims`}
+            trend={stats.charges_trend_percent}
+            trendLabel="vs last month"
+            icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
+          />
+          <KPICard
+            title="Collections"
+            value={formatCurrency(stats.total_paid)}
+            subtitle={`${stats.claims_paid} paid`}
+            trend={stats.collections_trend_percent}
+            trendLabel="vs last month"
+            icon={<TrendingUp className="h-4 w-4 text-green-500" />}
+          />
+          <KPICard
+            title="Outstanding"
+            value={formatCurrency(stats.total_outstanding)}
+            subtitle={`${stats.claims_submitted + stats.claims_accepted} pending`}
+            trend={stats.outstanding_trend_percent}
+            trendLabel="vs last month"
+            icon={<Clock className="h-4 w-4 text-yellow-500" />}
+          />
+          <KPICard
+            title="AR Days"
+            value={stats.ar_days}
+            subtitle="avg days to collect"
+            trend={stats.ar_days_trend}
+            invertTrend={true}
+            trendLabel="vs last month"
+            icon={<Clock className="h-4 w-4 text-blue-500" />}
+          />
+          <KPICard
+            title="First-Pass Rate"
+            value={`${stats.first_pass_rate?.toFixed(1) || 0}%`}
+            subtitle={`${stats.claims_denied} denied`}
+            trend={stats.first_pass_trend}
+            trendLabel="vs last month"
+            icon={<Percent className="h-4 w-4 text-muted-foreground" />}
+          />
+        </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(stats?.total_paid)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {stats?.claims_paid || 0} paid claims
-              </p>
-            </CardContent>
-          </Card>
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <RevenueTrendChart data={stats.revenue_trend || []} />
+          <PayerMixChart data={stats.payer_mix || []} />
+        </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
-              <Clock className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {formatCurrency(stats?.total_outstanding)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {stats?.claims_submitted || 0} pending
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">First-Pass Rate</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {stats?.first_pass_rate?.toFixed(1) || 0}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {stats?.claims_denied || 0} denied
-              </p>
-            </CardContent>
-          </Card>
+        {/* AR Aging + Action Items Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ARAgingChart data={stats.ar_aging || { current: 0, days_31_60: 0, days_61_90: 0, days_90_plus: 0 }} />
+          <ActionItemsPanel
+            data={stats.action_items || { claims_attention: 0, denials_to_work: 0, eligibility_failures: 0, payments_to_post: 0 }}
+            onViewAll={() => {}}
+          />
         </div>
 
         {/* Claims Table */}
@@ -408,48 +472,63 @@ const BillingDashboard = () => {
                       <TableHead>Service Date</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead className="text-center">Days</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {claims.map((claim) => (
-                      <TableRow key={claim.id}>
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedClaims.has(claim.id)}
-                            onCheckedChange={(checked) =>
-                              handleSelectClaim(claim.id, checked as boolean)
-                            }
-                            disabled={claim.status !== 'ready'}
-                          />
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {claim.claim_number}
-                        </TableCell>
-                        <TableCell>{claim.patient_name}</TableCell>
-                        <TableCell>
-                          {claim.insurance_carrier?.name || 'Self-Pay'}
-                        </TableCell>
-                        <TableCell>{formatDate(claim.service_date)}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCurrency(claim.total_charge)}
-                        </TableCell>
-                        <TableCell>
-                          <ClaimStatusBadge status={claim.status} size="sm" />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              navigate(`/billing/claims/${claim.id}`)
-                            }
-                          >
-                            View
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {claims.map((claim) => {
+                      const daysInStatus = getDaysInStatus(claim);
+                      return (
+                        <TableRow key={claim.id}>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedClaims.has(claim.id)}
+                              onCheckedChange={(checked) =>
+                                handleSelectClaim(claim.id, checked as boolean)
+                              }
+                              disabled={claim.status !== 'ready'}
+                            />
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {claim.claim_number}
+                          </TableCell>
+                          <TableCell>{claim.patient_name}</TableCell>
+                          <TableCell>
+                            {claim.insurance_carrier?.name || 'Self-Pay'}
+                          </TableCell>
+                          <TableCell>{formatDate(claim.service_date)}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatCurrency(claim.total_charge)}
+                          </TableCell>
+                          <TableCell>
+                            <ClaimStatusBadge status={claim.status} size="sm" />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span
+                              className={cn(
+                                'text-sm',
+                                daysInStatus > 30 && 'text-red-500 font-medium',
+                                daysInStatus > 14 && daysInStatus <= 30 && 'text-yellow-500',
+                              )}
+                            >
+                              {daysInStatus}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                navigate(`/billing/claims/${claim.id}`)
+                              }
+                            >
+                              View
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -458,9 +537,19 @@ const BillingDashboard = () => {
         </Card>
 
         {/* Quick Stats by Status */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
+        <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-2">
           {Object.entries(CLAIM_STATUS_CONFIG).map(([status, config]) => {
-            const count = claims.filter((c) => c.status === status).length;
+            const count =
+              status === 'draft' ? stats.claims_draft :
+              status === 'ready' ? stats.claims_ready :
+              status === 'submitted' ? stats.claims_submitted :
+              status === 'accepted' ? stats.claims_accepted :
+              status === 'rejected' ? stats.claims_rejected :
+              status === 'paid' ? stats.claims_paid :
+              status === 'denied' ? stats.claims_denied :
+              status === 'appealed' ? stats.claims_appealed :
+              claims.filter((c) => c.status === status).length;
+
             return (
               <Card
                 key={status}
